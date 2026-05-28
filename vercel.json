@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "_note": "comet-agent runs on Railway (Docker). Vercel provides Edge Config feature flags only — not app hosting.",
+  "edgeConfig": {
+    "browserProvider": "playwright",
+    "maxSessions": 5,
+    "enableScreenshots": true,
+    "rateLimitRpm": 60,
+    "maintenanceMode": false
+  }
+}

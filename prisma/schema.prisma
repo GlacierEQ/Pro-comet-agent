@@ -1,0 +1,89 @@
+// Supabase-compatible Prisma schema
+// DATABASE_URL = Supabase connection pooler (port 6543) — for runtime queries
+// DIRECT_URL   = Supabase direct connection (port 5432) — for migrations only
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── Browser Sessions ──────────────────────────────────────────────────────────
+model Session {
+  id        String        @id @default(uuid())
+  provider  String        @default("playwright")
+  status    SessionStatus @default(ACTIVE)
+  metadata  Json?         // viewport, userAgent, cookies snapshot
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  closedAt  DateTime?
+  jobs      Job[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SessionStatus {
+  ACTIVE
+  CLOSED
+  CRASHED
+}
+
+// ── Async Jobs ────────────────────────────────────────────────────────────────
+model Job {
+  id          String    @id @default(uuid())
+  type        String    // "mymap.create" | "browser.extract" | etc.
+  status      JobStatus @default(PENDING)
+  input       Json
+  result      Json?
+  error       String?
+  sessionId   String?
+  session     Session?  @relation(fields: [sessionId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([status])
+  @@index([type])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  ERROR
+  CANCELLED
+}
+
+// ── MyMap Artifacts ───────────────────────────────────────────────────────────
+model MapArtifact {
+  id         String   @id @default(uuid())
+  prompt     String
+  mapUrl     String
+  shareLink  String?
+  screenshot String?  // Supabase Storage public URL
+  jobId      String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// ── Audit Log ─────────────────────────────────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // "session.create" | "job.complete" | "map.create"
+  entity    String
+  entityId  String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
