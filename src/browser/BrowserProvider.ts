@@ -59,6 +59,9 @@ export interface BrowserProvider {
   /** Close a specific session */
   close(sessionId: string): Promise<void>;
 
+  /** List all active sessions */
+  listSessions(): Promise<BrowserSession[]>;
+
   /** Close all sessions and browser */
   closeAll(): Promise<void>;
 }

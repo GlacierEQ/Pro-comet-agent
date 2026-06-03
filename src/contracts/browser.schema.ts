@@ -38,8 +38,14 @@ export const LaunchSessionRequestSchema = z.object({
   sessionId: z.string().optional(),
 });
 
+export const ScreenshotRequestSchema = z.object({
+  sessionId: z.string().min(1),
+  fullPage: z.boolean().optional(),
+});
+
 export type NavigateRequest = z.infer<typeof NavigateRequestSchema>;
 export type ActRequest = z.infer<typeof ActRequestSchema>;
 export type ExtractRequest = z.infer<typeof ExtractRequestSchema>;
 export type CreateMapRequest = z.infer<typeof CreateMapRequestSchema>;
 export type LaunchSessionRequest = z.infer<typeof LaunchSessionRequestSchema>;
+export type ScreenshotRequest = z.infer<typeof ScreenshotRequestSchema>;

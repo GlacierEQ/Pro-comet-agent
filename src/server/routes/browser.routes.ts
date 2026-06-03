@@ -5,10 +5,21 @@ import {
   ActRequestSchema,
   ExtractRequestSchema,
   LaunchSessionRequestSchema,
+  ScreenshotRequestSchema,
 } from '../../contracts/browser.schema';
 import { logger } from '../../utils/logger';
 
 export const browserRouter = Router();
+
+// Helper to ensure a session exists, auto-recreating it if missing (for crash/SIGKILL recovery)
+async function ensureSession(provider: any, sessionId: string): Promise<void> {
+  const sessions = await provider.listSessions();
+  const exists = sessions.some((s: any) => s.id === sessionId);
+  if (!exists) {
+    logger.warn(`Session ${sessionId} not found. Auto-recreating context for resilient continuation.`);
+    await provider.launch(sessionId);
+  }
+}
 
 // POST /browser/session — launch a new browser session
 browserRouter.post('/session', async (req: Request, res: Response) => {
@@ -23,11 +34,24 @@ browserRouter.post('/session', async (req: Request, res: Response) => {
   }
 });
 
+// GET /browser/sessions — list active browser sessions
+browserRouter.get('/sessions', async (_req: Request, res: Response) => {
+  try {
+    const provider = await getProvider();
+    const sessions = await provider.listSessions();
+    res.json({ success: true, sessions });
+  } catch (err: any) {
+    logger.error('list sessions error', err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // POST /browser/navigate
 browserRouter.post('/navigate', async (req: Request, res: Response) => {
   try {
     const body = NavigateRequestSchema.parse(req.body);
     const provider = await getProvider();
+    await ensureSession(provider, body.sessionId);
     await provider.navigate(body.sessionId, body.url, {
       waitUntil: body.waitUntil,
       timeout: body.timeout,
@@ -45,6 +69,7 @@ browserRouter.post('/act', async (req: Request, res: Response) => {
   try {
     const body = ActRequestSchema.parse(req.body);
     const provider = await getProvider();
+    await ensureSession(provider, body.sessionId);
     await provider.act(body.sessionId, {
       selector: body.selector,
       instruction: body.instruction,
@@ -63,6 +88,7 @@ browserRouter.post('/extract', async (req: Request, res: Response) => {
   try {
     const body = ExtractRequestSchema.parse(req.body);
     const provider = await getProvider();
+    await ensureSession(provider, body.sessionId);
     const data = await provider.extract(body.sessionId, {
       selector: body.selector,
       instruction: body.instruction,
@@ -78,10 +104,10 @@ browserRouter.post('/extract', async (req: Request, res: Response) => {
 // POST /browser/screenshot
 browserRouter.post('/screenshot', async (req: Request, res: Response) => {
   try {
-    const { sessionId, fullPage } = req.body;
-    if (!sessionId) return res.status(400).json({ error: 'sessionId required' });
+    const body = ScreenshotRequestSchema.parse(req.body);
     const provider = await getProvider();
-    const buffer = await provider.screenshot(sessionId, { fullPage: fullPage ?? false });
+    await ensureSession(provider, body.sessionId);
+    const buffer = await provider.screenshot(body.sessionId, { fullPage: body.fullPage ?? false });
     res.set('Content-Type', 'image/png');
     res.send(buffer);
   } catch (err: any) {

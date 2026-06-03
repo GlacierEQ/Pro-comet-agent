@@ -43,7 +43,8 @@ workflowRouter.get('/mymap/share', async (req: Request, res: Response) => {
   try {
     const { sessionId, mapUrl } = req.query as { sessionId: string; mapUrl: string };
     if (!sessionId || !mapUrl) {
-      return res.status(400).json({ error: 'sessionId and mapUrl required' });
+      res.status(400).json({ error: 'sessionId and mapUrl required' });
+      return;
     }
     const shareLink = await getShareLink(sessionId, mapUrl);
     res.json({ success: true, shareLink });

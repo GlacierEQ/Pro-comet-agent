@@ -11,6 +11,9 @@ jobRouter.get('/', (_req: Request, res: Response) => {
 // GET /jobs/:id — get single job
 jobRouter.get('/:id', (req: Request, res: Response) => {
   const job = jobStore.get(req.params.id);
-  if (!job) return res.status(404).json({ error: 'Job not found' });
+  if (!job) {
+    res.status(404).json({ error: 'Job not found' });
+    return;
+  }
   res.json({ job });
 });

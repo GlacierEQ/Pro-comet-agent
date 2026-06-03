@@ -38,8 +38,8 @@
 
 | # | Issue | Priority | Status |
 |---|---|---|---|
-| 1 | src/ directory not committed — source missing from main | HIGH | Open |
-| 2 | Joi still in dependencies — replace with Zod only | MEDIUM | In progress |
-| 3 | Puppeteer still in dependencies — replace with Playwright | HIGH | In progress |
+| 1 | src/ directory not committed — source missing from main | HIGH | Fixed |
+| 2 | Joi still in dependencies — replace with Zod only | MEDIUM | Fixed |
+| 3 | Puppeteer still in dependencies — replace with Playwright | HIGH | Fixed |
 | 4 | README was empty 132 bytes | HIGH | Fixed |
 | 5 | No .env.example existed | HIGH | Fixed |

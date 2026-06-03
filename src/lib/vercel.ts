@@ -30,7 +30,7 @@ export async function getFlag<T>(key: string, defaultValue: T): Promise<T> {
   const client = await getClient();
   if (!client) return defaultValue;
   try {
-    const value = await client.get<T>(key);
+    const value = await (client as any).get(key);
     return value ?? defaultValue;
   } catch {
     return defaultValue;
