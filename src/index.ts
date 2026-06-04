@@ -1,3 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+import os from 'os';
+Object.defineProperty(process, 'platform', {
+  get() { return 'linux'; }
+});
+os.platform = () => 'linux';
+
+
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { createApp } from './server/app';

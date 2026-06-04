@@ -49,7 +49,11 @@ export class PlaywrightProvider implements BrowserProvider {
 
   private async ensureBrowser(): Promise<Browser> {
     if (!this.browser) {
-      this.browser = await chromium.launch({ headless: this.headless });
+      const execPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined;
+      this.browser = await chromium.launch({
+        headless: this.headless,
+        executablePath: execPath
+      });
       // Trigger initial pool replenishment
       this.replenishPool().catch(err => {
         logger.error('[PlaywrightProvider] failed to initialize context pool:', err);
