@@ -1,20 +1,15 @@
-# Ultra-lean CI — lint + typecheck only
-# No browser install. No test runner. Zero wasted minutes.
-# Heavy E2E runs on Railway post-deploy, not here.
-
-name: CI
+name: TypeScript CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
-  check:
-    name: Lint & Typecheck
+  test:
+    name: Type Check + Lint + Test
     runs-on: ubuntu-latest
-    timeout-minutes: 5          # Hard cap — if it takes longer something is wrong
 
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +17,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm             # Cache node_modules across runs
+          cache: npm
 
-      - name: Install deps (no optional, no postinstall browsers)
-        run: npm ci --ignore-scripts
+      - name: Install dependencies
+        run: npm install
 
-      - name: TypeScript typecheck
+      - name: Type check
         run: npx tsc --noEmit
 
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        run: npm run test
