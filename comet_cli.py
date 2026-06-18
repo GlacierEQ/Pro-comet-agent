@@ -147,7 +147,7 @@ class CometClient:
         """Helper to create session and establish logging boundaries."""
         r = self.create_session(custom_id)
         if r and r.status_code == 200:
-            data = r.json()
+            payload = r.json()
             self.session_id = data["session"]["id"]
             
             # Setup session audit log path
@@ -254,9 +254,9 @@ class CometClient:
         
         r = self.extract_request(payload)
         if r and r.status_code == 200:
-            data = r.json().get("data")
+            payload = r.json().get("data")
             log_success("Extraction completed successfully.")
-            self.log_activity(f"Extraction success. Data length: {len(str(data))}")
+            self.log_activity(f"Extraction success. Data length: {len(str(payload))}")
             return data
         else:
             code = r.status_code if r else "CONNECTION ERROR"
@@ -362,7 +362,7 @@ def save_extracted_data(data: Any, default_name: str = "extracted_data.txt"):
             if isinstance(data, (dict, list)):
                 json.dump(data, f, indent=2)
             else:
-                f.write(str(data))
+                f.write(str(payload))
         log_success(f"Extracted content successfully exported to: {C_BOLD}{dest_path}{C_RESET}")
     except Exception as e:
         log_error(f"Failed to write exported file: {e}")
@@ -407,14 +407,14 @@ def run_session_menu(client: CometClient):
                 inst = input("Enter extraction instruction (leave blank for raw HTML): ").strip()
                 if not inst:
                     inst = None
-            data = client.extract(selector=sel, instruction=inst)
+            payload = client.extract(selector=sel, instruction=inst)
             if data:
                 print(f"\n{C_DIM}--- EXTRACTED CONTENT PREVIEW ---{C_RESET}")
                 if isinstance(data, (dict, list)):
                     preview = json.dumps(data, indent=2)
                     default_ext = "extracted_data.json"
                 else:
-                    preview = str(data)
+                    preview = str(payload)
                     default_ext = "extracted_page.html" if not sel and not inst else "extracted_data.txt"
                 
                 print(preview[:800])

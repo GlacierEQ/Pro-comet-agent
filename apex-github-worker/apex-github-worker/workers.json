@@ -1,7 +1,0 @@
-{
-  "name": "apex-github-worker",
-  "version": 1,
-  "main": "src/index.ts",
-  "environment": "production",
-  "compatibility_date": "2024-01-01"
-}
