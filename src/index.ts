@@ -1,30 +1,31 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import os from 'os';
-Object.defineProperty(process, 'platform', {
-  get() { return 'linux'; }
-});
-os.platform = () => 'linux';
-
-
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { createApp } from './server/app';
 import { getProvider } from './browser/providerFactory';
 import { logger } from './utils/logger';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 const PORT = parseInt(process.env.PORT ?? '8787', 10);
 
-async function cleanupOrphanedProcesses() {
+/**
+ * Only clean up orphaned Playwright/Chromium processes when NOT using CometProvider.
+ * When BROWSER_PROVIDER=comet, Comet is already running — we must never kill it.
+ */
+async function cleanupOrphanedProcesses(): Promise<void> {
+  const provider = (process.env.BROWSER_PROVIDER ?? 'playwright').toLowerCase().trim();
+  if (provider === 'comet') {
+    logger.info('[Startup] CometProvider mode — skipping orphan browser cleanup to preserve running Comet instance.');
+    return;
+  }
+
   try {
     logger.info('Performing startup process scan to clean up orphaned browsers...');
-    // Under Linux/Termux, kill any lingering chrome/chromium/playwright processes from previous runs
     await execAsync('pkill -9 -f "chrome|chromium|playwright"');
     logger.info('Orphaned browser cleanup completed.');
   } catch (err: any) {
-    // If command is missing (exit code 127) or fails due to system configuration
     if (err.code === 127 || (err.message && (err.message.includes('not found') || err.message.includes('ENOENT')))) {
       logger.warn('[Resilience Warning] "pkill" utility not found in system PATH. Reaping is disabled. Install "procps" (Debian/Crostini/Nix) or "busybox" (Termux) to enable.');
     } else {
@@ -33,13 +34,12 @@ async function cleanupOrphanedProcesses() {
   }
 }
 
-async function main() {
-  // Clean up any browser processes orphaned by previous crashes or SIGKILL (Signal 9)
+async function main(): Promise<void> {
   await cleanupOrphanedProcesses();
 
-  // Pre-warm browser provider
   const provider = await getProvider();
-  logger.info(`Browser provider ready: ${process.env.BROWSER_PROVIDER ?? 'playwright'}`);
+  const providerName = (process.env.BROWSER_PROVIDER ?? 'playwright').toLowerCase().trim();
+  logger.info(`Browser provider ready: ${providerName}`);
 
   const app = createApp();
 
@@ -48,8 +48,7 @@ async function main() {
     logger.info(`Environment: ${process.env.NODE_ENV ?? 'development'}`);
   });
 
-  // Graceful shutdown
-  const shutdown = async (signal: string) => {
+  const shutdown = async (signal: string): Promise<void> => {
     logger.info(`${signal} received — shutting down`);
     server.close(async () => {
       await provider.closeAll();
