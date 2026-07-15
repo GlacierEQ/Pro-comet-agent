@@ -10,7 +10,7 @@ Canonical implementation:
 
 This file makes no network request, reads no credential value, creates no
 memory, computes no deadline, monitors no person, and performs no external
-legal or notification action.
+legal or notification action. The syntax is compatible with Python 3.8+.
 """
 
 from __future__ import annotations
@@ -19,15 +19,15 @@ import json
 import os
 import sys
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
-from typing import Final
+from datetime import datetime, timezone
+from typing import Dict, Final, List, Optional, Set
 
 CASE_ID: Final = "1FDV-23-0001009"
 CANONICAL_REPOSITORY: Final = "GlacierEQ/SUPERLUMINAL_CASE_MATRIX"
 CANONICAL_PATH: Final = "CASEBRAIN_V3"
 CANONICAL_MEMORY_PROJECT: Final = "sm_project_unified_case_brain"
 
-RETIRED_COMMANDS: Final = {
+RETIRED_COMMANDS: Final[Set[str]] = {
     "activate",
     "deploy",
     "monitor",
@@ -39,7 +39,7 @@ RETIRED_COMMANDS: Final = {
 }
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class RetirementStatus:
     status: str
     service: str
@@ -78,11 +78,11 @@ def get_status() -> RetirementStatus:
             "truth/sensitivity classification, procedural-risk conditions, and "
             "human approval gates."
         ),
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
-def deprecated_environment_warning() -> list[str]:
+def deprecated_environment_warning() -> List[str]:
     """Detect deprecated variable names without reading or printing values."""
 
     names = (
@@ -102,13 +102,13 @@ def deprecated_environment_warning() -> list[str]:
     ]
 
 
-def render_status() -> dict[str, object]:
-    payload: dict[str, object] = asdict(get_status())
+def render_status() -> Dict[str, object]:
+    payload = asdict(get_status())
     payload["warnings"] = deprecated_environment_warning()
     return payload
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     command = args[0].lower() if args else "status"
     print(json.dumps(render_status(), indent=2, sort_keys=True))
@@ -117,10 +117,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if command in RETIRED_COMMANDS:
-        print(f"Command {command!r} is retired. No action was performed.", file=sys.stderr)
+        print(
+            "Command {!r} is retired. No action was performed.".format(command),
+            file=sys.stderr,
+        )
         return 2
 
-    print(f"Unknown or retired command {command!r}. No action was performed.", file=sys.stderr)
+    print(
+        "Unknown or retired command {!r}. No action was performed.".format(command),
+        file=sys.stderr,
+    )
     return 2
 
 
