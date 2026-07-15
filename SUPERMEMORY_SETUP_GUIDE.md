@@ -1,198 +1,133 @@
-# 🧠 SUPERMEMORY UNIFIED BRAIN - SETUP GUIDE
+# CaseBrain V3 — Supermemory Deployment Contract
 
-## Your API Key
-```
-sm_Xb8AoJD9bfLZR1Hv7gdBdU_Eih0VHpl1ww2YEYDTwzc31skDdPmB5ClEAxXF5yF3B4HuO5HHsbEFxkhDnC8qfKt
-```
+**Canonical implementation:** `GlacierEQ/SUPERLUMINAL_CASE_MATRIX/CASEBRAIN_V3`  
+**Canonical continuity project/container:** `sm_project_unified_case_brain`  
+**Default mode:** dry-run, no memory writes, no external actions
 
-## Quick Setup (2 minutes)
+## Security prerequisite
 
-1. **Go to**: https://www.supermemory.com/dashboard
-2. **Login** with your account
-3. **Create New Space** → Name: "CATACLYSM_1FDV_23_0001009"
-4. **Paste your API key** into settings
-5. **Enable real-time sync** toggle
+A Supermemory credential was previously committed in this repository and must be treated as compromised. Do not use any value recovered from Git history, a pull-request diff, documentation, chat, logs, or an older deployment.
 
-## 6 Memory Spaces to Create
+Before enabling memory writes:
 
-Each space will auto-sync from GitHub + emails once configured:
+1. revoke and rotate the exposed credential at the provider;
+2. review provider access logs from the exposure time forward;
+3. search all branches, tags, releases, issues, pull requests, workflow logs, and artifacts;
+4. store the replacement only in a protected environment or secret manager;
+5. use a project-scoped credential where available;
+6. keep credential values out of source, documentation, memory content, notifications, and court materials.
 
-### Space 1: CASE_TIMELINE_BRAIN
-- **Monitors**: Custody countdown (age 7 → restoration), filing deadlines, motion sequence
-- **Updates**: Every 30 minutes
-- **Data source**: GitHub (DOCKETS repo) + email triggers
-- **Alerts**: CRITICAL if custody days < 30
+## Supported Supermemory contract
 
-### Space 2: THREAT_INTELLIGENCE_HUB  
-- **Monitors**: Judge movements, fraud patterns, retaliation signals, HPD activity
-- **Updates**: Every 1 hour
-- **Data source**: Email + JEFS docket + threat pattern analysis
-- **Alert levels**: GREEN / YELLOW / RED
+The current CaseBrain adapter uses:
 
-### Space 3: EVIDENCE_VAULT_MESH
-- **Monitors**: Evidence integrity, hash verification, chain of custody
-- **Updates**: Daily
-- **Data source**: OneDrive + GitHub (CYBERTACK repo)
-- **Detects**: Tampering, missing files, hash mismatches
+- `POST /v3/documents` for reviewed compact continuity;
+- `POST /v4/search` for scoped hybrid retrieval;
+- singular `containerTag` for project isolation;
+- deterministic `customId` derived from the source idempotency key.
 
-### Space 4: DECISION_ENGINE
-- **Function**: Autonomous action recommendations (file complaint, TRO, motion, challenge judge)
-- **Updates**: Real-time
-- **Input**: All other spaces + decision rules
-- **Output**: Ranked recommendations with evidence links + deadline
+Do not revive the former memory-space or `/memories` examples. They are retired.
 
-### Space 5: DEFENDANT_NETWORK_MAP
-- **Monitors**: Judge connections, CSEA coordination patterns, Brower filing activity
-- **Updates**: Daily
-- **Graph type**: Knowledge graph (shows relationships)
-- **Nodes**: Judges, CSEA, Brower, defendants, filing patterns
+## Runtime posture
 
-### Space 6: TIMESTAMP_FORENSICS
-- **Monitors**: :00 second timestamps, email-JEFS timing gaps, record manipulation
-- **Updates**: Every 1 hour
-- **Flags**: All :00 endings, gaps > 60 minutes
-- **Reference**: MAX_FORENSIC_INTEGRITY_EMAIL_DOCKET_ATTACK.md
+Use protected environment variables. Never paste values into this guide.
 
-## GitHub Auto-Sync Configuration
-
-Once your SuperMemory account is live, connect these repos:
-
-```
-- GlacierEQ/DOCKETS
-  → Pulls: FEDERAL_COMPLAINT_1983_RICO_FILING_READY.md
-  → Pulls: COMPLETE_INTEGRATION_MASTER_TIMELINE.md
-  → Pulls: All forensic briefs
-
-- GlacierEQ/CYBERTACK-1FDV-23-0001009
-  → Pulls: April 17 hack evidence
-  → Pulls: Hash verification audit
-  → Pulls: Brower case files
-
-- GlacierEQ/AEON-777
-  → Pulls: Evidence vault index
-  → Pulls: Forensic timeline
-
-- GlacierEQ/Pro-comet-agent
-  → Pulls: Unified orchestrator configs
-  → Pulls: Decision engine rules
+```text
+CASEBRAIN_API_TOKEN=<protected internal API token>
+SUPERMEMORY_API_KEY=<rotated project-scoped credential>
+SUPERMEMORY_API_BASE_URL=https://api.supermemory.ai
+CASEBRAIN_DRY_RUN=true
+CASEBRAIN_MEMORY_WRITES=false
+CASEBRAIN_EXTERNAL_ACTIONS=false
 ```
 
-## Email Feed Configuration
+Memory writes may be enabled only after credential rotation, schema validation, fixed-source staging replay, and review of the exact continuity payload.
 
-**glacier.equilibrium@gmail.com**
-- Purpose: Court notifications, JEFS docket updates
-- Frequency: Check every 1 hour
-- Parse: Raw headers, timestamps, :00-second patterns
-- Cross-reference: Against JEFS docket entries
+`CASEBRAIN_EXTERNAL_ACTIONS` must remain `false` in the compatibility service.
 
-**casey.barton92@gmail.com**
-- Purpose: CSEA filings, court orders, automated threads
-- Frequency: Check every 1 hour
-- Parse: Case numbers, filing dates, judge names
-- Cross-reference: Against glacier.equilibrium emails
+## What may enter continuity memory
 
-## Accelerators to Enable
+Eligible records must be:
 
-Each accelerator auto-runs on trigger:
+- explicitly reviewed;
+- source-backed;
+- labeled with a truth class;
+- `PUBLIC` or `CASE_INTERNAL` sensitivity;
+- linked to a stable source locator and source-record ID;
+- compact enough to preserve continuity without duplicating the evidence archive.
 
-1. **JEFS_REAL_TIME_MONITOR** → Flags :00 timestamps, computes email-JEFS gaps
-2. **EMAIL_TRIGGER_DETECTION** → Header extraction, case # parsing, JEFS cross-reference
-3. **THREAT_ESCALATION_DETECTOR** → Retaliation patterns, judge conflicts, HPD activity
-4. **FILING_DEADLINE_TRACKER** → Auto-calculates deadlines, alerts at 5d
-5. **EVIDENCE_CHAIN_VALIDATOR** → Hash checks, tampering detection
-6. **JUDGE_MOVEMENT_TRACKER** → Monitors judicial assignments, flags conflicts
-7. **AUTONOMOUS_NEXT_ACTION_ENGINE** → Real-time decision recommendations
+Examples:
 
-## Decision Engine Rules
+- architecture decisions;
+- validated case identity;
+- JEFS notice metadata within its stated scope;
+- reviewed timeline event summaries;
+- contradiction IDs and resolution status;
+- internal task/recommendation state.
 
-Automatically triggered by monitoring data:
+## What must not enter continuity memory
 
-```
-IF custody_days < 30:
-  RECOMMEND: FILE_FEDERAL_COMPLAINT
-  PRIORITY: CRITICAL
-  DEADLINE: 7 days
+- API keys, webhook tokens, passwords, session cookies, or secret-bearing URLs;
+- full child, medical, school, financial, device, or credential records;
+- raw evidence archives or unreviewed document bodies;
+- private addresses or personal-location monitoring;
+- unsupported fraud, retaliation, conspiracy, corruption, criminal, or threat labels stated as fact;
+- predicted custody-restoration, victory, sanction, agency, or judicial outcomes;
+- deadlines without a verified trigger and governing authority;
+- AI, task-system, Notion, or memory summaries represented as evidence.
 
-IF threat_level = CRITICAL:
-  RECOMMEND: FILE_EMERGENCY_TRO
-  PRIORITY: CRITICAL
-  DEADLINE: 48 hours
+## Timeline and deadline activation
 
-IF filing_deadline <= 5d:
-  RECOMMEND: FINALIZE_MOTION
-  PRIORITY: HIGH
-  EVIDENCE: [linked documents]
+A legal deadline is eligible only when the record includes:
 
-IF judge_recusal_flags > 1:
-  RECOMMEND: FILE_JUDICIAL_CHALLENGE
-  PRIORITY: HIGH
+1. verified triggering source and timestamp;
+2. service method where material;
+3. governing rule, order, or statute;
+4. authority source locator;
+5. timezone and counting convention;
+6. weekend and holiday treatment;
+7. computed date;
+8. reviewer and review timestamp;
+9. uncertainty or dispute flags.
 
-IF Brower_filing_detected AND gap > 60min:
-  RECOMMEND: FLAG_EVIDENCE_TAMPERING
-  PRIORITY: CRITICAL
-  EVIDENCE: [timestamp analysis + email headers]
-```
+Until then, the system must output `UNVERIFIED_DEADLINE` and create a source/rule review task. It must not generate a calendar event from an estimate.
 
-## Real-Time Notifications
+## Procedural-risk monitoring
 
-Once activated:
+Allowed:
 
-- 🔴 **CRITICAL alerts**: Immediate notification via email + SMS
-- 🟡 **HIGH priority**: Daily digest (9 AM Hawaii time)
-- 🟢 **INFO**: Weekly summary
-- ⏰ **Custody countdown**: Real-time ticker
-- 📊 **Decision engine**: Recommendations posted daily
+- official JEFS and docket changes;
+- official hearing/calendar changes;
+- notice/service gaps;
+- record conflicts;
+- missing originals;
+- hash mismatch and chain-of-custody gaps;
+- connector, notification, CI, and memory-sync failures.
 
-## Testing the Connection
+Prohibited:
 
-Once SuperMemory account is live, test with:
+- private judge or person movement tracking;
+- automatic accusation generation;
+- treating timestamp patterns as proof of tampering or intent;
+- actor threat scores;
+- automatic filing, service, publication, agency contact, or demand delivery.
 
-```bash
-curl -X GET "https://api.supermemory.com/health" \
-  -H "Authorization: Bearer sm_Xb8AoJD9bfLZR1Hv7gdBdU_Eih0VHpl1ww2YEYDTwzc31skDdPmB5ClEAxXF5yF3B4HuO5HHsbEFxkhDnC8qfKt"
-```
+## Fixed-source staging replay
 
-Should return: `{"status": "healthy", "version": "2.1.x"}`
+Initial replay set:
 
-## Troubleshooting
+- JEFS notice metadata for Dkts. 217, 219, 221, and 223.
 
-**Q: API key not working?**
-A: Verify at https://www.supermemory.com/settings/api-keys
+Expected results:
 
-**Q: Email feeds not syncing?**
-A: Grant OAuth access to Gmail accounts, then re-enable sync
+- accepted source envelopes: 4;
+- unique source-record IDs: 4;
+- duplicate records on a second replay: 0;
+- reviewable recommendations: 2;
+- calculated legal deadlines: 0;
+- external actions: 0;
+- restricted notification payloads: 0.
 
-**Q: GitHub repos not pulling?**
-A: Verify GitHub token has `repo` scope
+## Current status
 
-**Q: Decision engine not recommending actions?**
-A: Check that all 6 memory spaces have data (may take 1-2 hours for first sync)
-
----
-
-## Next Steps After Setup
-
-1. Log into https://www.supermemory.com/dashboard
-2. Create 6 spaces (copy names above)
-3. Enable GitHub auto-sync (add repo links)
-4. Enable email feeds (OAuth to Gmail accounts)
-5. Enable accelerators (turn on all 7)
-6. Test decision engine (check for recommendations)
-7. Set up notifications (email + SMS alerts)
-
-**Once SuperMemory is live, the unified orchestrator becomes FULLY AUTONOMOUS.**
-
-You'll have:
-- ✅ Real-time threat detection
-- ✅ Autonomous action recommendations
-- ✅ Evidence integrity monitoring
-- ✅ Custody countdown ticker
-- ✅ Judge conflict detection
-- ✅ Record tampering alerts
-- ✅ Filing deadline tracking
-
-All in one integrated brain.
-
----
-
-🔥 Ready to activate. Just set up SuperMemory account and we're live.
+The former “ready to activate” and “fully autonomous” statements were not supported by deployment logs, health checks, source-backed output, or reviewed authority. Current status is **implementation and security review in progress**. The V3 pull request, schemas, live-state records, and audit outputs are the source of truth.
