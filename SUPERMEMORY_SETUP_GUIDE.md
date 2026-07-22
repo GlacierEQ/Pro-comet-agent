@@ -1,57 +1,56 @@
 # 🧠 SUPERMEMORY UNIFIED BRAIN - SETUP GUIDE
 
-## Your API Key
-```
-sm_Xb8AoJD9bfLZR1Hv7gdBdU_Eih0VHpl1ww2YEYDTwzc31skDdPmB5ClEAxXF5yF3B4HuO5HHsbEFxkhDnC8qfKt
-```
+## API Key
+
+The API key is intentionally not stored in this guide. Store it only in the approved secret manager or GitHub repository secret `SUPERMEMORY_API_KEY`. Any previously exposed key must be revoked at the provider.
 
 ## Quick Setup (2 minutes)
 
-1. **Go to**: https://www.supermemory.com/dashboard
-2. **Login** with your account
-3. **Create New Space** → Name: "CATACLYSM_1FDV_23_0001009"
-4. **Paste your API key** into settings
-5. **Enable real-time sync** toggle
+1. Go to: https://www.supermemory.com/dashboard
+2. Log in with your account
+3. Create New Space → Name: `CATACLYSM_1FDV_23_0001009`
+4. Configure the API key only through the approved secret manager
+5. Enable real-time sync
 
 ## 6 Memory Spaces to Create
 
 Each space will auto-sync from GitHub + emails once configured:
 
 ### Space 1: CASE_TIMELINE_BRAIN
-- **Monitors**: Custody countdown (age 7 → restoration), filing deadlines, motion sequence
-- **Updates**: Every 30 minutes
-- **Data source**: GitHub (DOCKETS repo) + email triggers
-- **Alerts**: CRITICAL if custody days < 30
+- Monitors: Custody countdown (age 7 → restoration), filing deadlines, motion sequence
+- Updates: Every 30 minutes
+- Data source: GitHub (DOCKETS repo) + email triggers
+- Alerts: CRITICAL if custody days < 30
 
-### Space 2: THREAT_INTELLIGENCE_HUB  
-- **Monitors**: Judge movements, fraud patterns, retaliation signals, HPD activity
-- **Updates**: Every 1 hour
-- **Data source**: Email + JEFS docket + threat pattern analysis
-- **Alert levels**: GREEN / YELLOW / RED
+### Space 2: THREAT_INTELLIGENCE_HUB
+- Monitors: Judge movements, fraud patterns, retaliation signals, HPD activity
+- Updates: Every 1 hour
+- Data source: Email + JEFS docket + threat pattern analysis
+- Alert levels: GREEN / YELLOW / RED
 
 ### Space 3: EVIDENCE_VAULT_MESH
-- **Monitors**: Evidence integrity, hash verification, chain of custody
-- **Updates**: Daily
-- **Data source**: OneDrive + GitHub (CYBERTACK repo)
-- **Detects**: Tampering, missing files, hash mismatches
+- Monitors: Evidence integrity, hash verification, chain of custody
+- Updates: Daily
+- Data source: OneDrive + GitHub (CYBERTACK repo)
+- Detects: Tampering, missing files, hash mismatches
 
 ### Space 4: DECISION_ENGINE
-- **Function**: Autonomous action recommendations (file complaint, TRO, motion, challenge judge)
-- **Updates**: Real-time
-- **Input**: All other spaces + decision rules
-- **Output**: Ranked recommendations with evidence links + deadline
+- Function: Autonomous action recommendations (file complaint, TRO, motion, challenge judge)
+- Updates: Real-time
+- Input: All other spaces + decision rules
+- Output: Ranked recommendations with evidence links + deadline
 
 ### Space 5: DEFENDANT_NETWORK_MAP
-- **Monitors**: Judge connections, CSEA coordination patterns, Brower filing activity
-- **Updates**: Daily
-- **Graph type**: Knowledge graph (shows relationships)
-- **Nodes**: Judges, CSEA, Brower, defendants, filing patterns
+- Monitors: Judge connections, CSEA coordination patterns, Brower filing activity
+- Updates: Daily
+- Graph type: Knowledge graph (shows relationships)
+- Nodes: Judges, CSEA, Brower, defendants, filing patterns
 
 ### Space 6: TIMESTAMP_FORENSICS
-- **Monitors**: :00 second timestamps, email-JEFS timing gaps, record manipulation
-- **Updates**: Every 1 hour
-- **Flags**: All :00 endings, gaps > 60 minutes
-- **Reference**: MAX_FORENSIC_INTEGRITY_EMAIL_DOCKET_ATTACK.md
+- Monitors: :00 second timestamps, email-JEFS timing gaps, record manipulation
+- Updates: Every 1 hour
+- Flags: All :00 endings, gaps > 60 minutes
+- Reference: MAX_FORENSIC_INTEGRITY_EMAIL_DOCKET_ATTACK.md
 
 ## GitHub Auto-Sync Configuration
 
@@ -137,36 +136,29 @@ IF Brower_filing_detected AND gap > 60min:
 
 Once activated:
 
-- 🔴 **CRITICAL alerts**: Immediate notification via email + SMS
-- 🟡 **HIGH priority**: Daily digest (9 AM Hawaii time)
-- 🟢 **INFO**: Weekly summary
-- ⏰ **Custody countdown**: Real-time ticker
-- 📊 **Decision engine**: Recommendations posted daily
+- 🔴 CRITICAL alerts: Immediate notification via email + SMS
+- 🟡 HIGH priority: Daily digest (9 AM Hawaii time)
+- 🟢 INFO: Weekly summary
+- ⏰ Custody countdown: Real-time ticker
+- 📊 Decision engine: Recommendations posted daily
 
 ## Testing the Connection
 
-Once SuperMemory account is live, test with:
-
-```bash
-curl -X GET "https://api.supermemory.com/health" \
-  -H "Authorization: Bearer sm_Xb8AoJD9bfLZR1Hv7gdBdU_Eih0VHpl1ww2YEYDTwzc31skDdPmB5ClEAxXF5yF3B4HuO5HHsbEFxkhDnC8qfKt"
-```
-
-Should return: `{"status": "healthy", "version": "2.1.x"}`
+Use the approved connection or secret manager. Never place the key in repository files, chat, or notes.
 
 ## Troubleshooting
 
 **Q: API key not working?**
-A: Verify at https://www.supermemory.com/settings/api-keys
+A: Verify the key at https://www.supermemory.com/settings/api-keys and confirm the repository secret is current.
 
 **Q: Email feeds not syncing?**
-A: Grant OAuth access to Gmail accounts, then re-enable sync
+A: Grant OAuth access to Gmail accounts, then re-enable sync.
 
 **Q: GitHub repos not pulling?**
-A: Verify GitHub token has `repo` scope
+A: Verify GitHub access and repository permissions.
 
 **Q: Decision engine not recommending actions?**
-A: Check that all 6 memory spaces have data (may take 1-2 hours for first sync)
+A: Check that all 6 memory spaces have data (may take 1–2 hours for first sync).
 
 ---
 
@@ -180,19 +172,6 @@ A: Check that all 6 memory spaces have data (may take 1-2 hours for first sync)
 6. Test decision engine (check for recommendations)
 7. Set up notifications (email + SMS alerts)
 
-**Once SuperMemory is live, the unified orchestrator becomes FULLY AUTONOMOUS.**
+**Once SuperMemory is live, the unified orchestrator becomes fully autonomous.**
 
-You'll have:
-- ✅ Real-time threat detection
-- ✅ Autonomous action recommendations
-- ✅ Evidence integrity monitoring
-- ✅ Custody countdown ticker
-- ✅ Judge conflict detection
-- ✅ Record tampering alerts
-- ✅ Filing deadline tracking
-
-All in one integrated brain.
-
----
-
-🔥 Ready to activate. Just set up SuperMemory account and we're live.
+Decision recommendations remain advisory: they do not automatically file, accuse, contact courts, or destroy evidence.
