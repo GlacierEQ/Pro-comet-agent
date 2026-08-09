@@ -1,89 +1,171 @@
-Business Source License 1.1
+GLACIEREQ PROPRIETARY LICENSE
+Version 1.1 — August 2026
+(Public surface · commercial reserve · diligence-friendly)
 
-Parameters
+Copyright (c) 2026 Casey del Carpio Barton / GlacierEQ. All rights reserved.
 
-Licensor:             Casey (GlacierEQ)
-Licensed Work:        Pro-comet-agent / GlacierEQ Comet Agent
-                      The Licensed Work is (c) 2025-2026 Casey (GlacierEQ)
-Additional Use Grant: You may make non-production use of the Licensed Work,
-                      including use for research, evaluation, personal projects,
-                      and non-commercial applications.
-Change Date:          Four years from the date the Licensed Work was first
-                      publicly released under this License.
-Change License:       Apache License, Version 2.0
+NOTICE: This software, documentation, catalogs, schemas, classification systems,
+workflows, and associated files (collectively, the "Software") are the proprietary
+property of GlacierEQ. This License is not a sale. It conveys only the limited
+rights expressly granted below.
 
----
+This repository is published publicly so commercial leaders, engineers, and
+hiring reviewers may inspect GlacierEQ systems work. Public visibility is an act
+of professional pride and verification — not a grant of commercial rights, not a
+waiver of ownership, and not open source.
 
-Terms
+-----------------------------------------------------------------------------
+1. DEFINITIONS
 
-The Licensor hereby grants you the right to copy, modify, create derivative
-works, redistribute, and make non-production use of the Licensed Work. The
-Licensor may make an Additional Use Grant, above, permitting limited production use.
+  "You" means any person or entity exercising rights under this License.
 
-Effective on the Change Date, or the fourth anniversary of the first publicly
-available distribution of a specific version of the Licensed Work under this
-License, whichever comes first, the Licensor hereby grants you rights under
-the terms of the Change License, and the rights granted in the paragraph
-above terminate.
+  "Derivative Work" means any work based on or derived from the Software,
+  including translations, annotations, modifications, extensions, configurations,
+  integrations, rehostings, or any work that incorporates substantial portions
+  of the Software's expression.
 
-If your use of the Licensed Work does not comply with the requirements
-currently in effect as described in this License, you must purchase a
-commercial license from the Licensor, its affiliated entities, or authorized
-resellers, or you must refrain from using the Licensed Work.
+  "Public Surface" means materials intentionally published in this repository
+  for inspection, verification, and professional evaluation.
 
-All copies of the original and modified Licensed Work, and derivative works
-of the Licensed Work, are subject to this License. This License applies
-separately for each version of the Licensed Work and the Change Date may vary
-for each version of the Licensed Work released by the Licensor.
+  "Integrity Materials" means contents under `.integrity/` (or legacy `.shadow/`
+  operator layers), including operator-only state, unreleased doctrine, commercial
+  terms, release authority material, and non-public provenance — whether or not a
+  particular file is present in a given clone.
 
-You must conspicuously display this License on each original or modified copy
-of the Licensed Work. If you receive the Licensed Work in original or
-modified form from a third party, the terms and conditions set forth in this
-License apply to your use of that work.
+-----------------------------------------------------------------------------
+2. GRANT OF LICENSE (LIMITED)
 
-Any use of the Licensed Work in violation of this License will automatically
-terminate your rights under this License for the current and all other
-versions of the Licensed Work.
+  Subject to this License, GlacierEQ grants You a limited, non-exclusive,
+  non-transferable, revocable license to:
 
-This License does not grant you any right in any trademark or logo of
-Licensor or its affiliates (provided that you may use a trademark or logo of
-Licensor as expressly required by this License).
+  (a) View, clone, and read the Public Surface;
 
-TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSED WORK IS PROVIDED ON
-an "AS IS" BASIS. LICENSOR HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS,
-EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND
-TITLE.
+  (b) Use the Public Surface for personal evaluation, academic study, and
+      employment or commercial due diligence (including hiring review);
 
-MariaDB hereby grants you permission to use this License's text to license
-your works, and to refer to it using the trademark "Business Source License",
-as long as you comply with the Covenants of Licensor below.
+  (c) Fork the Public Surface solely for the purposes in (b), without
+      redistribution as a product or service;
 
-Covenants of Licensor
+  (d) Create temporary local notes or excerpts strictly as needed for (b),
+      provided GlacierEQ authorship and this License remain attributed;
 
-In consideration of the right to use this License's text and the "Business
-Source License" name and trademark, Licensor covenants to MariaDB, and to
-all recipients of the licensed work to be provided by Licensor:
+  (e) Copy the Public Surface for personal backup and archival.
 
-1. To specify as the Change License the GPL Version 2.0 or any later version,
-   or a license that is compatible with GPL Version 2.0 or a later version,
-   where "compatible" means that software provided under the Change License can
-   be included in a program with software provided under GPL Version 2.0 or a
-   later version. Licensor may specify additional conditions above.
+  No other rights are granted by implication, estoppel, or otherwise.
 
-2. To either: (a) specify an additional grant of rights to use that does not
-   impose any additional restriction on the right granted in this License, as
-   the Additional Use Grant; or (b) insert the text "None".
+-----------------------------------------------------------------------------
+3. RESTRICTIONS
 
-3. To specify a Change Date.
+  You SHALL NOT, without a separate written commercial license from GlacierEQ:
 
-4. Not to modify this License in any other way.
+  (a) Distribute, publish, sublicense, sell, rent, lease, mirror, or otherwise
+      make the Software (or a substantial portion of its expression) available
+      to third parties as a product, dataset, service, or competing work;
 
----
+  (b) Use the Software to provide hosted, consulting, managed, or SaaS services
+      to third parties that substantially reproduce the Software's value;
 
-Commercial Licensing
+  (c) Remove, alter, or obscure proprietary notices, license text, attribution,
+      watermark markers, or integrity manifests;
 
-For commercial use of the Licensed Work, contact:
-Casey (GlacierEQ)
-GLACIER.EQUILIBRIUM@GMAIL.COM
-https://github.com/GlacierEQ
+  (d) Claim ownership of the Software or any Derivative Work, or present the
+      Software as originating from You or Your organization;
+
+  (e) Integrate the Software (or substantial Derivative Works) into commercial
+      products, internal production platforms, or startup offerings;
+
+  (f) Access, exfiltrate, or rely on Integrity Materials except as an authorized
+      GlacierEQ collaborator under separate terms;
+
+  (g) Use the Software in any manner that violates applicable law.
+
+  Reverse engineering restrictions apply only to the extent permitted by law
+  and only to non-public compilation artifacts if any; the Public Surface is
+  already source-form for inspection under §2.
+
+-----------------------------------------------------------------------------
+4. INTELLECTUAL PROPERTY
+
+  The Software and all intellectual property rights therein remain the exclusive
+  property of GlacierEQ / Casey del Carpio Barton. No title or ownership is
+  transferred under this License.
+
+  Public disclosure of the Public Surface is intended to establish dated public
+  evidence of authorship and expression. It does not grant patent rights, does
+  not waive rights in unpublished materials, and does not authorize commercial
+  pattern harvesting of the Software's expression into competing products.
+
+-----------------------------------------------------------------------------
+5. PUBLIC SURFACE vs CONFIDENTIALITY
+
+  The Public Surface is intentionally visible. Do not treat "proprietary"
+  as a claim that published files are trade secrets after public release.
+
+  Confidentiality obligations attach to:
+
+  (a) Integrity Materials;
+  (b) Non-public communications, commercial terms, and collaborator access;
+  (c) Any materials GlacierEQ marks confidential in writing.
+
+  You must protect such materials with at least reasonable care.
+
+-----------------------------------------------------------------------------
+6. WATERMARKS & INTEGRITY (EVIDENTIARY)
+
+  The Software may contain intentional structural markers, naming conventions,
+  integrity manifests, and idiosyncratic strings. Their presence in unauthorized
+  copies may be used as evidence of derivation. This is an evidentiary aid, not
+  a substitute for independent proof of infringement.
+
+-----------------------------------------------------------------------------
+7. TERMINATION
+
+  This License continues until terminated. Rights terminate automatically upon
+  breach. Upon termination, You must cease use beyond personal archival of
+  lawfully obtained Public Surface copies that retain this License notice, and
+  destroy Integrity Materials and unauthorized Derivative Works.
+
+-----------------------------------------------------------------------------
+8. DISCLAIMER OF WARRANTIES
+
+  THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+  NON-INFRINGEMENT. GLACIEREQ DOES NOT WARRANT THAT THE SOFTWARE WILL MEET
+  YOUR REQUIREMENTS OR OPERATE WITHOUT INTERRUPTION OR ERROR.
+
+-----------------------------------------------------------------------------
+9. LIMITATION OF LIABILITY
+
+  IN NO EVENT SHALL GLACIEREQ BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+  CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE, REGARDLESS OF THEORY OF LIABILITY, TO THE MAXIMUM EXTENT PERMITTED
+  BY LAW.
+
+-----------------------------------------------------------------------------
+10. GOVERNING LAW & VENUE
+
+  This License is governed by the laws of the State of Hawaii, without regard
+  to conflict-of-laws principles. Exclusive venue lies in the state or federal
+  courts located in Hawaii, unless GlacierEQ elects otherwise in writing for
+  a particular enforcement action.
+
+-----------------------------------------------------------------------------
+11. ENTIRE AGREEMENT
+
+  This License is the entire agreement regarding the Software's Public Surface
+  and supersedes prior or contemporaneous communications on that subject.
+  Commercial licenses, NDAs, and collaborator agreements control if executed.
+
+-----------------------------------------------------------------------------
+12. CONTACT
+
+  Licensing and collaborator inquiries: glacier.equilibrium@gmail.com
+  Organization: https://github.com/GlacierEQ
+
+-----------------------------------------------------------------------------
+By cloning, viewing, using, or forking this repository, You acknowledge that
+You have read and agree to this License. If You do not agree, do not use the
+Software.
+
+"Passion on the public surface. Rights reserved where they matter."
+"Mastermind integrity team: public verify · private authority."
