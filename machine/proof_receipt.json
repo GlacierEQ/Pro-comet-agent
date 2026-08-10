@@ -2,14 +2,14 @@
   "schema": "glaciereq.proof-receipt.v1",
   "repository": "GlacierEQ/Pro-comet-agent",
   "source_sha": "814dbc18c877f22167b44b71fb87dc68a2395009e711f9e0b595dce4ac090f11",
-  "proof_id": "elite-Pro-comet-agent-1786335149",
+  "proof_id": "elite-Pro-comet-agent-1786340995",
   "environment": {
-    "python": "/Users/kcbflux/job-app/excellence/.venv-elite/bin/python",
+    "python": "/Users/kcbflux/.local/bin/python3.11",
     "PYTHONPATH": "/Users/kcbflux/job-app/repos/Pro-comet-agent:/Users/kcbflux/job-app/repos/Pro-comet-agent/src",
     "entry": "unittest"
   },
   "tests": [
-    "/Users/kcbflux/job-app/excellence/.venv-elite/bin/python -m unittest discover -s tests -v (x2)"
+    "/Users/kcbflux/.local/bin/python3.11 -m unittest discover -s tests -v (x2)"
   ],
   "adversarial_tests": [
     "tests/test_adversarial.py"
@@ -24,8 +24,8 @@
     "not production deployed",
     "reference implementation only"
   ],
-  "timestamp": "2026-08-10T04:12Z",
+  "timestamp": "2026-08-10T05:49Z",
   "artifact_hashes": {
-    "operability_receipt": "cca484565e0e64f02c794167b5be4ff8fb8bd07a9e4e51a5f2e6c52c5f8dc6ea"
+    "operability_receipt": "86ee7a321d19271324209a3317bddcc5bbf52968512758821f3a665fe2e8e1a9"
   }
 }

@@ -1,7 +1,7 @@
 {
   "schema": "glaciereq.operability-receipt.v1",
   "repository": "GlacierEQ/Pro-comet-agent",
-  "at": "2026-08-10T04:12Z",
+  "at": "2026-08-10T05:49Z",
   "source_sha": "814dbc18c877f22167b44b71fb87dc68a2395009e711f9e0b595dce4ac090f11",
   "entry": "scripts/operate.py",
   "primary_output": {
