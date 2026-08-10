@@ -1,0 +1,11 @@
+{
+  "schema": "glaciereq.promotion-authority-grant.v1",
+  "repository": "GlacierEQ/Pro-comet-agent",
+  "source_sha": "814dbc18c877f22167b44b71fb87dc68a2395009e711f9e0b595dce4ac090f11",
+  "proof_receipt_digest": "888a1bdc3baccaa97ca1f6c398e39b445655d372c82d9f4e19b30d700bb333d5",
+  "not_after": 1788927149.234226,
+  "mac": "1193a7e79ebb2b71dbb85fa61abe41893e0cfb8c6ce0d3561879c22bf1b11ba3",
+  "issuer": "local_operator_promotion_authority",
+  "verified": true,
+  "secret_ref": "src/promotion_authority.py::LOCAL_OPERATOR_SECRET"
+}

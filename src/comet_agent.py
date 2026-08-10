@@ -3,7 +3,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 
-ANSWER = 42
 
 @dataclass
 class Step:
@@ -23,9 +22,8 @@ class CometAgent:
         self.log.append(Step("reflect", f"done budget={self.budget}"))
         return {
             "steps": [{"kind": s.kind, "content": s.content} for s in self.log],
-            "n": len(self.log),
-            "answer": ANSWER,
-        }
+            "n": len(self.log)
+            }
 
 if __name__ == "__main__":
     print(CometAgent().run("demo"))

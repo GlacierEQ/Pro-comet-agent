@@ -1,0 +1,50 @@
+{
+  "schema": "glaciereq.operability-receipt.v1",
+  "repository": "GlacierEQ/Pro-comet-agent",
+  "at": "2026-08-10T04:12Z",
+  "source_sha": "814dbc18c877f22167b44b71fb87dc68a2395009e711f9e0b595dce4ac090f11",
+  "entry": "scripts/operate.py",
+  "primary_output": {
+    "module": "comet_agent",
+    "ok": true,
+    "repository": "GlacierEQ/Pro-comet-agent",
+    "smoke": {
+      "args": [
+        "'sample_goal'"
+      ],
+      "content_checked": true,
+      "invoked": true,
+      "kind": "class",
+      "method": "run",
+      "module_local": true,
+      "name": "CometAgent",
+      "result": {
+        "n": 5,
+        "steps": [
+          {
+            "content": "goal=sample_goal",
+            "kind": "plan"
+          },
+          {
+            "content": "action_0",
+            "kind": "act"
+          },
+          {
+            "content": "action_1",
+            "kind": "act"
+          },
+          {
+            "content": "action_2",
+            "kind": "act"
+          },
+          {
+            "content": "done budget=5",
+            "kind": "reflect"
+          }
+        ]
+      }
+    }
+  },
+  "dual_run_ok": true,
+  "result": "PASS"
+}
