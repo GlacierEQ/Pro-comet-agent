@@ -11,7 +11,7 @@
  * Usage: set BROWSER_PROVIDER=comet in your .env
  */
 
-import { chromium, Browser, BrowserContext, Page, CDPSession } from 'playwright';
+import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../utils/logger';
 import {
@@ -52,7 +52,6 @@ export class CometProvider implements BrowserProvider {
 
     logger.info(`[CometProvider] connecting to Comet CDP at ${this.cdpUrl}`);
 
-    // Verify Comet is reachable before attempting connection
     try {
       const res = await fetch(`${this.cdpUrl}/json/version`);
       if (!res.ok) throw new Error(`CDP /json/version returned ${res.status}`);
@@ -73,8 +72,6 @@ export class CometProvider implements BrowserProvider {
 
   async launch(sessionId?: string): Promise<BrowserSession> {
     const browser = await this.ensureBrowser();
-
-    // Use existing context if available (Comet's active window)
     const contexts = browser.contexts();
     let context: BrowserContext;
     let page: Page;
@@ -85,9 +82,7 @@ export class CometProvider implements BrowserProvider {
       page = pages.length > 0 ? pages[0] : await context.newPage();
       logger.info('[CometProvider] reusing existing Comet browser context.');
     } else {
-      context = await browser.newContext({
-        viewport: { width: 1440, height: 900 },
-      });
+      context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
       page = await context.newPage();
       logger.info('[CometProvider] created new context in Comet browser.');
     }
@@ -148,13 +143,11 @@ export class CometProvider implements BrowserProvider {
   }
 
   async listSessions(): Promise<BrowserSession[]> {
-    return Array.from(this.sessions.values()).map((s) => s.session);
+    return Array.from(this.sessions.values()).map((state) => state.session);
   }
 
   async close(sessionId: string): Promise<void> {
-    const state = this.sessions.get(sessionId);
-    if (state) {
-      // Don't close Comet's context — just detach our session tracking
+    if (this.sessions.has(sessionId)) {
       this.sessions.delete(sessionId);
       logger.info(`[CometProvider] detached session: ${sessionId}`);
     }
@@ -177,7 +170,6 @@ export class CometProvider implements BrowserProvider {
       this.cleanupInterval = null;
     }
     for (const [id] of this.sessions) await this.close(id);
-    // Disconnect from Comet CDP without closing the browser itself
     if (this.browser) {
       await this.browser.close().catch(() => {});
       this.browser = null;
