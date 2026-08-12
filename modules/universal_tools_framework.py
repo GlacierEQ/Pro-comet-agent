@@ -1,1 +1,462 @@
-"""\n╔══════════════════════════════════════════════════════════════════════════╗\n║                                                                          ║\n║         UNIVERSAL TOOLS FRAMEWORK — APEX ARCHITECTURE                   ║\n║                                                                          ║\n║  Self-healing, self-aware, self-evolving connector abstraction layer    ║\n║  With continuous micro-optimizations & adaptive intelligence            ║\n║                                                                          ║\n║  \"One hit. Perfect execution. Masters recognize masters.\" —PRO_CODE     ║\n║                                                                          ║\n╚══════════════════════════════════════════════════════════════════════════╝\n"""\n\nimport asyncio\nimport json\nimport time\nimport logging\nfrom abc import ABC, abstractmethod\nfrom typing import Any, Dict, List, Optional, Union, Callable\nfrom dataclasses import dataclass, asdict, field\nfrom datetime import datetime, timedelta\nfrom enum import Enum\nimport hashlib\nfrom contextlib import asynccontextmanager\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# CONSTANTS & CONFIGURATION\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass ConnectorSource(Enum):\n    \"\"\"Supported connector sources\"\"\"\n    ONEDRIVE = \"onedrive\"\n    GDRIVE = \"gdrive\"\n    DROPBOX = \"dropbox\"\n    GMAIL_CASEY = \"gmail_casey\"\n    GMAIL_GLACIER = \"gmail_glacier\"\n    GITHUB = \"github\"\n    ALL = \"all\"\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# TELEMETRY & SELF-AWARENESS\n# ═══════════════════════════════════════════════════════════════════════════\n\n@dataclass\nclass ToolMetrics:\n    \"\"\"Metrics for self-evolution & adaptive intelligence\"\"\"\n    tool_name: str\n    source: str\n    call_count: int = 0\n    success_count: int = 0\n    error_count: int = 0\n    avg_latency_ms: float = 0.0\n    last_error: Optional[str] = None\n    last_error_time: Optional[datetime] = None\n    adaptive_timeout: float = 5.0  # Self-adjusting\n    preference_score: float = 1.0  # For ranking\n    \n    def record_success(self, latency_ms: float):\n        \"\"\"Record successful call & self-heal\"\"\"\n        self.call_count += 1\n        self.success_count += 1\n        self.avg_latency_ms = (self.avg_latency_ms * (self.success_count - 1) + latency_ms) / self.success_count\n        self.adaptive_timeout = self.avg_latency_ms * 2.5  # Future-proof timeout\n        self.preference_score = min(1.0, self.success_count / max(1, self.call_count))\n    \n    def record_error(self, error: str):\n        \"\"\"Record error & self-correct\"\"\"\n        self.call_count += 1\n        self.error_count += 1\n        self.last_error = error\n        self.last_error_time = datetime.now()\n        self.adaptive_timeout *= 1.5  # Increase timeout on failure\n        self.preference_score = max(0.1, self.preference_score * 0.95)\n    \n    def is_degraded(self) -> bool:\n        \"\"\"Self-awareness: detect degradation\"\"\"\n        if self.call_count < 5:\n            return False\n        error_rate = self.error_count / self.call_count\n        return error_rate > 0.2\n\n\nclass MetricsCollector:\n    \"\"\"Central metrics hub for self-evolution\"\"\"\n    def __init__(self):\n        self.metrics: Dict[str, ToolMetrics] = {}\n        self.evolution_log: List[Dict] = []\n        self.start_time = datetime.now()\n    \n    def get_or_create(self, tool_name: str, source: str) -> ToolMetrics:\n        key = f\"{tool_name}:{source}\"\n        if key not in self.metrics:\n            self.metrics[key] = ToolMetrics(tool_name=tool_name, source=source)\n        return self.metrics[key]\n    \n    def log_evolution(self, event: Dict):\n        \"\"\"Log self-improvement events\"\"\"\n        event['timestamp'] = datetime.now().isoformat()\n        self.evolution_log.append(event)\n        if len(self.evolution_log) > 1000:  # Auto-cleanup\n            self.evolution_log = self.evolution_log[-500:]\n    \n    def get_health_report(self) -> Dict:\n        \"\"\"Self-awareness snapshot\"\"\"\n        total_calls = sum(m.call_count for m in self.metrics.values())\n        total_success = sum(m.success_count for m in self.metrics.values())\n        total_errors = sum(m.error_count for m in self.metrics.values())\n        degraded = [k for k, m in self.metrics.items() if m.is_degraded()]\n        \n        return {\n            \"uptime\": str(datetime.now() - self.start_time),\n            \"total_calls\": total_calls,\n            \"success_rate\": total_success / max(1, total_calls),\n            \"error_count\": total_errors,\n            \"degraded_tools\": degraded,\n            \"avg_latency_ms\": sum(m.avg_latency_ms for m in self.metrics.values()) / max(1, len(self.metrics)),\n        }\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# ADAPTER INTERFACE (Abstract Base)\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass ConnectorAdapter(ABC):\n    \"\"\"\n    Base adapter for all connectors.\n    Defines unified interface with self-healing error recovery.\n    \"\"\"\n    \n    def __init__(self, source: ConnectorSource, metrics: MetricsCollector):\n        self.source = source\n        self.metrics = metrics\n        self.is_connected = False\n        self.connection_attempts = 0\n        self.max_retries = 3\n        self.logger = logging.getLogger(f\"adapter.{source.value}\")\n    \n    @abstractmethod\n    async def connect(self) -> bool:\n        \"\"\"Establish connection with self-healing retry logic\"\"\"\n        pass\n    \n    @abstractmethod\n    async def search(self, query: str, **kwargs) -> List[Dict]:\n        \"\"\"Search with unified result format\"\"\"\n        pass\n    \n    @abstractmethod\n    async def download(self, file_id: str, **kwargs) -> bytes:\n        \"\"\"Download file\"\"\"\n        pass\n    \n    async def _execute_with_metrics(\n        self, \n        operation_name: str, \n        operation: Callable,\n        *args,\n        **kwargs\n    ) -> Any:\n        \"\"\"\n        Execute operation with auto-metrics, error recovery, and self-healing.\n        One-hit execution: works first time or self-corrects.\n        \"\"\"\n        metrics = self.metrics.get_or_create(operation_name, self.source.value)\n        start = time.time()\n        \n        try:\n            # Execute with adaptive timeout\n            result = await asyncio.wait_for(\n                operation(*args, **kwargs),\n                timeout=metrics.adaptive_timeout\n            )\n            \n            latency_ms = (time.time() - start) * 1000\n            metrics.record_success(latency_ms)\n            \n            return result\n        \n        except asyncio.TimeoutError as e:\n            metrics.record_error(f\"timeout:{metrics.adaptive_timeout}s\")\n            self.metrics.log_evolution({\n                \"event\": \"timeout_recovery\",\n                \"operation\": operation_name,\n                \"action\": \"increasing_timeout\"\n            })\n            raise\n        \n        except Exception as e:\n            metrics.record_error(str(e))\n            self.metrics.log_evolution({\n                \"event\": \"error_recorded\",\n                \"operation\": operation_name,\n                \"error_type\": type(e).__name__,\n                \"degraded\": metrics.is_degraded()\n            })\n            raise\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# CONCRETE ADAPTERS (Stub implementations — extend with actual connectors)\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass OneDriveAdapter(ConnectorAdapter):\n    \"\"\"OneDrive connector with self-healing\"\"\"\n    \n    async def connect(self) -> bool:\n        \"\"\"Connect with exponential backoff self-healing\"\"\"\n        for attempt in range(self.max_retries):\n            try:\n                # TODO: Actual OneDrive connection logic\n                self.is_connected = True\n                self.connection_attempts = attempt + 1\n                return True\n            except Exception as e:\n                if attempt == self.max_retries - 1:\n                    self.logger.error(f\"Failed after {self.max_retries} attempts: {e}\")\n                    return False\n                await asyncio.sleep(2 ** attempt)  # Exponential backoff\n        return False\n    \n    async def search(self, query: str, **kwargs) -> List[Dict]:\n        async def _search():\n            # TODO: Actual OneDrive search\n            return []\n        \n        return await self._execute_with_metrics(\"search\", _search)\n    \n    async def download(self, file_id: str, **kwargs) -> bytes:\n        async def _download():\n            # TODO: Actual OneDrive download\n            return b\"\"\n        \n        return await self._execute_with_metrics(\"download\", _download)\n\n\nclass GoogleDriveAdapter(ConnectorAdapter):\n    \"\"\"Google Drive connector with self-healing\"\"\"\n    \n    async def connect(self) -> bool:\n        for attempt in range(self.max_retries):\n            try:\n                # TODO: Actual Google Drive connection\n                self.is_connected = True\n                return True\n            except Exception as e:\n                if attempt == self.max_retries - 1:\n                    return False\n                await asyncio.sleep(2 ** attempt)\n        return False\n    \n    async def search(self, query: str, **kwargs) -> List[Dict]:\n        async def _search():\n            # TODO: Actual Google Drive search\n            return []\n        \n        return await self._execute_with_metrics(\"search\", _search)\n    \n    async def download(self, file_id: str, **kwargs) -> bytes:\n        async def _download():\n            # TODO: Actual Google Drive download\n            return b\"\"\n        \n        return await self._execute_with_metrics(\"download\", _download)\n\n\nclass DropboxAdapter(ConnectorAdapter):\n    \"\"\"Dropbox connector with self-healing\"\"\"\n    \n    async def connect(self) -> bool:\n        for attempt in range(self.max_retries):\n            try:\n                # TODO: Actual Dropbox connection\n                self.is_connected = True\n                return True\n            except Exception as e:\n                if attempt == self.max_retries - 1:\n                    return False\n                await asyncio.sleep(2 ** attempt)\n        return False\n    \n    async def search(self, query: str, **kwargs) -> List[Dict]:\n        async def _search():\n            # TODO: Actual Dropbox search\n            return []\n        \n        return await self._execute_with_metrics(\"search\", _search)\n    \n    async def download(self, file_id: str, **kwargs) -> bytes:\n        async def _download():\n            # TODO: Actual Dropbox download\n            return b\"\"\n        \n        return await self._execute_with_metrics(\"download\", _download)\n\n\nclass GmailAdapter(ConnectorAdapter):\n    \"\"\"Gmail connector (dual-account aware)\"\"\"\n    \n    def __init__(self, account: str, metrics: MetricsCollector):\n        source = ConnectorSource.GMAIL_CASEY if account == \"casey\" else ConnectorSource.GMAIL_GLACIER\n        super().__init__(source, metrics)\n        self.account = account\n    \n    async def connect(self) -> bool:\n        for attempt in range(self.max_retries):\n            try:\n                # TODO: Actual Gmail connection\n                self.is_connected = True\n                return True\n            except Exception as e:\n                if attempt == self.max_retries - 1:\n                    return False\n                await asyncio.sleep(2 ** attempt)\n        return False\n    \n    async def search(self, query: str, **kwargs) -> List[Dict]:\n        async def _search():\n            # TODO: Actual Gmail search\n            return []\n        \n        return await self._execute_with_metrics(\"search\", _search)\n    \n    async def download(self, file_id: str, **kwargs) -> bytes:\n        async def _download():\n            # TODO: Gmail attachment download\n            return b\"\"\n        \n        return await self._execute_with_metrics(\"download\", _download)\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# LAZY CONNECTOR LOADER (Smart, self-aware connection pooling)\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass LazyConnectorLoader:\n    \"\"\"\n    Intelligent connection pool with auto-loading, auto-unloading, and self-awareness.\n    Only loads connectors when needed. Unloads after timeout.\n    \"\"\"\n    \n    def __init__(self, idle_timeout_sec: float = 300.0):\n        self.loaded: Dict[ConnectorSource, ConnectorAdapter] = {}\n        self.last_used: Dict[ConnectorSource, float] = {}\n        self.idle_timeout = idle_timeout_sec\n        self.metrics = MetricsCollector()\n        self.logger = logging.getLogger(\"connector_loader\")\n        \n        # Adapter registry (future-proof for new connectors)\n        self.adapter_classes = {\n            ConnectorSource.ONEDRIVE: OneDriveAdapter,\n            ConnectorSource.GDRIVE: GoogleDriveAdapter,\n            ConnectorSource.DROPBOX: DropboxAdapter,\n            ConnectorSource.GMAIL_CASEY: lambda metrics: GmailAdapter(\"casey\", metrics),\n            ConnectorSource.GMAIL_GLACIER: lambda metrics: GmailAdapter(\"glacier\", metrics),\n        }\n    \n    @asynccontextmanager\n    async def get_adapter(self, source: Union[ConnectorSource, str]):\n        \"\"\"\n        Get adapter with auto-connection & context management.\n        \"One hit\" execution: loads, uses, cleans up.\n        \"\"\"\n        if isinstance(source, str):\n            try:\n                source = ConnectorSource(source)\n            except ValueError:\n                raise ValueError(f\"Unknown connector source: {source}\")\n        \n        # Load if not connected\n        if source not in self.loaded:\n            await self._load_connector(source)\n        \n        # Update usage timestamp (for auto-unload)\n        self.last_used[source] = time.time()\n        \n        try:\n            yield self.loaded[source]\n        except Exception as e:\n            self.logger.error(f\"Error using {source.value}: {e}\")\n            # Self-healing: unload on error, will reload next time\n            await self._unload_connector(source)\n            raise\n    \n    async def _load_connector(self, source: ConnectorSource):\n        \"\"\"Load and connect to connector\"\"\"\n        if source not in self.adapter_classes:\n            raise ValueError(f\"No adapter for {source.value}\")\n        \n        adapter_class = self.adapter_classes[source]\n        \n        # Handle lambda adapters (dual Gmail)\n        if callable(adapter_class) and not isinstance(adapter_class, type):\n            adapter = adapter_class(self.metrics)\n        else:\n            adapter = adapter_class(source, self.metrics)\n        \n        if await adapter.connect():\n            self.loaded[source] = adapter\n            self.metrics.log_evolution({\n                \"event\": \"connector_loaded\",\n                \"source\": source.value\n            })\n        else:\n            raise RuntimeError(f\"Failed to connect to {source.value}\")\n    \n    async def _unload_connector(self, source: ConnectorSource):\n        \"\"\"Unload connector\"\"\"\n        if source in self.loaded:\n            del self.loaded[source]\n            self.metrics.log_evolution({\n                \"event\": \"connector_unloaded\",\n                \"source\": source.value\n            })\n    \n    async def cleanup_idle(self):\n        \"\"\"Self-healing: periodically unload idle connectors\"\"\"\n        now = time.time()\n        idle = [\n            source for source, last_use in self.last_used.items()\n            if (now - last_use) > self.idle_timeout\n        ]\n        \n        for source in idle:\n            await self._unload_connector(source)\n            if source in self.last_used:\n                del self.last_used[source]\n            \n            self.metrics.log_evolution({\n                \"event\": \"idle_cleanup\",\n                \"source\": source.value,\n                \"idle_seconds\": now - self.last_used.get(source, now)\n            })\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# UNIVERSAL TOOLS (15 core tools for all agents)\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass UniversalTools:\n    \"\"\"\n    The 15 universal tools that route to any connector.\n    Future-proof, self-healing, self-aware architecture.\n    \"\"\"\n    \n    def __init__(self, loader: LazyConnectorLoader):\n        self.loader = loader\n        self.logger = logging.getLogger(\"universal_tools\")\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # FILE OPERATIONS (5 tools)\n    # ─────────────────────────────────────────────────────────────────────\n    \n    async def search_files(\n        self,\n        query: str,\n        source: Union[str, List[str]] = \"all\",\n        limit: int = 50,\n        **kwargs\n    ) -> List[Dict]:\n        \"\"\"\n        Search files across connectors.\n        One-hit execution: parallel search across sources, merge results.\n        \"\"\"\n        sources = self._normalize_sources(source)\n        results = []\n        \n        # Parallel search across sources\n        tasks = [\n            self._search_single_source(s, query, limit)\n            for s in sources\n        ]\n        \n        source_results = await asyncio.gather(*tasks, return_exceptions=True)\n        \n        for source, result in zip(sources, source_results):\n            if isinstance(result, Exception):\n                self.logger.warning(f\"Search failed for {source}: {result}\")\n            else:\n                results.extend(result)\n        \n        return results[:limit]\n    \n    async def _search_single_source(self, source: str, query: str, limit: int):\n        \"\"\"Search single source with error handling\"\"\"\n        try:\n            async with self.loader.get_adapter(source) as adapter:\n                return await adapter.search(query, limit=limit)\n        except Exception as e:\n            self.logger.error(f\"Search error in {source}: {e}\")\n            return []\n    \n    async def download_file(self, file_id: str, source: str, **kwargs) -> bytes:\n        \"\"\"Download file from specific source\"\"\"\n        async with self.loader.get_adapter(source) as adapter:\n            return await adapter.download(file_id, **kwargs)\n    \n    async def upload_file(\n        self,\n        file_path: str,\n        destination: str,\n        source: str,\n        **kwargs\n    ) -> Dict:\n        \"\"\"Upload file to connector (stub for now)\"\"\"\n        # TODO: Implement upload in adapters\n        raise NotImplementedError(\"Upload pending adapter implementation\")\n    \n    async def list_folder(self, folder_id: str, source: str, **kwargs) -> List[Dict]:\n        \"\"\"List folder contents\"\"\"\n        async with self.loader.get_adapter(source) as adapter:\n            # TODO: Implement list_folder in adapters\n            return []\n    \n    async def get_file_metadata(self, file_id: str, source: str, **kwargs) -> Dict:\n        \"\"\"Get file metadata\"\"\"\n        async with self.loader.get_adapter(source) as adapter:\n            # TODO: Implement get_metadata in adapters\n            return {}\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # EMAIL OPERATIONS (3 tools)\n    # ─────────────────────────────────────────────────────────────────────\n    \n    async def search_emails(\n        self,\n        query: str,\n        account: str = \"all\",\n        limit: int = 50,\n        **kwargs\n    ) -> List[Dict]:\n        \"\"\"Search emails in Gmail accounts\"\"\"\n        accounts = self._normalize_email_accounts(account)\n        results = []\n        \n        tasks = [\n            self._search_emails_single(a, query, limit)\n            for a in accounts\n        ]\n        \n        account_results = await asyncio.gather(*tasks, return_exceptions=True)\n        \n        for account, result in zip(accounts, account_results):\n            if isinstance(result, Exception):\n                self.logger.warning(f\"Email search failed for {account}: {result}\")\n            else:\n                results.extend(result)\n        \n        return results[:limit]\n    \n    async def _search_emails_single(self, account: str, query: str, limit: int):\n        \"\"\"Search single email account\"\"\"\n        try:\n            if account == \"casey\":\n                source = ConnectorSource.GMAIL_CASEY\n            else:\n                source = ConnectorSource.GMAIL_GLACIER\n            \n            async with self.loader.get_adapter(source) as adapter:\n                return await adapter.search(query, limit=limit)\n        except Exception as e:\n            self.logger.error(f\"Email search error: {e}\")\n            return []\n    \n    async def send_message(\n        self,\n        to: str,\n        body: str,\n        account: str,\n        subject: str = \"\",\n        **kwargs\n    ) -> Dict:\n        \"\"\"Send email (stub)\"\"\"\n        # TODO: Implement in Gmail adapter\n        raise NotImplementedError(\"Send pending Gmail adapter implementation\")\n    \n    async def list_threads(self, account: str = \"all\", limit: int = 50) -> List[Dict]:\n        \"\"\"List email threads\"\"\"\n        # TODO: Implement in Gmail adapter\n        return []\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # DOCUMENT OPERATIONS (2 tools)\n    # ─────────────────────────────────────────────────────────────────────\n    \n    async def create_document(\n        self,\n        title: str,\n        content: str,\n        service: str = \"gdrive\",\n        **kwargs\n    ) -> Dict:\n        \"\"\"Create document in service\"\"\"\n        # TODO: Implement in adapters\n        raise NotImplementedError(\"Create pending adapter implementation\")\n    \n    async def read_document(\n        self,\n        doc_id: str,\n        service: str = \"gdrive\",\n        **kwargs\n    ) -> str:\n        \"\"\"Read document content\"\"\"\n        # TODO: Implement in adapters\n        return \"\"\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # WEB OPERATIONS (2 tools)\n    # ─────────────────────────────────────────────────────────────────────\n    \n    async def search_web(self, query: str, num_results: int = 10, **kwargs) -> List[Dict]:\n        \"\"\"Search web (stub for now)\"\"\"\n        # TODO: Integrate browser/web search\n        raise NotImplementedError(\"Web search pending implementation\")\n    \n    async def navigate_and_scrape(\n        self,\n        url: str,\n        selectors: Dict[str, str],\n        **kwargs\n    ) -> Dict:\n        \"\"\"Navigate URL and scrape data\"\"\"\n        # TODO: Integrate browser automation\n        raise NotImplementedError(\"Web scraping pending browser integration\")\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # UTILITIES (3 tools)\n    # ─────────────────────────────────────────────────────────────────────\n    \n    async def parse_data(\n        self,\n        data: Union[str, bytes],\n        format: str = \"json\",\n        **kwargs\n    ) -> Dict:\n        \"\"\"Parse data in various formats\"\"\"\n        if format.lower() == \"json\":\n            return json.loads(data if isinstance(data, str) else data.decode())\n        # TODO: Add CSV, XML, etc.\n        raise NotImplementedError(f\"Format {format} not supported\")\n    \n    async def merge_results(self, results: List[List[Dict]], **kwargs) -> List[Dict]:\n        \"\"\"Merge & deduplicate results from multiple sources\"\"\"\n        merged = {}\n        for result_set in results:\n            for result in result_set:\n                # Dedup by content hash\n                key = hashlib.md5(json.dumps(result, sort_keys=True).encode()).hexdigest()\n                merged[key] = result\n        \n        return list(merged.values())\n    \n    async def get_health_report(self) -> Dict:\n        \"\"\"Get system health & evolution report\"\"\"\n        return self.loader.metrics.get_health_report()\n    \n    # ─────────────────────────────────────────────────────────────────────\n    # HELPER METHODS\n    # ─────────────────────────────────────────────────────────────────────\n    \n    def _normalize_sources(self, source: Union[str, List[str]]) -> List[str]:\n        \"\"\"Normalize source parameter to list\"\"\"\n        if source == \"all\":\n            return [s.value for s in ConnectorSource if s != ConnectorSource.ALL]\n        elif isinstance(source, str):\n            return [source]\n        else:\n            return source\n    \n    def _normalize_email_accounts(self, account: Union[str, List[str]]) -> List[str]:\n        \"\"\"Normalize email account parameter\"\"\"\n        if account == \"all\":\n            return [\"casey\", \"glacier\"]\n        elif isinstance(account, str):\n            return [account]\n        else:\n            return account\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# MAIN ROUTER & EXPORT\n# ═══════════════════════════════════════════════════════════════════════════\n\nclass UniversalToolRouter:\n    \"\"\"\n    Main entry point: 15 universal tools + self-awareness + metrics.\n    Future-proof, self-healing, self-evolving architecture.\n    \"\"\"\n    \n    def __init__(self, idle_timeout_sec: float = 300.0):\n        self.loader = LazyConnectorLoader(idle_timeout_sec)\n        self.tools = UniversalTools(self.loader)\n        self.logger = logging.getLogger(\"universal_router\")\n        self._cleanup_task = None\n    \n    def get_tools(self) -> List[Callable]:\n        \"\"\"\n        Export 15 universal tools for agent.\n        Everything else is hidden complexity.\n        \"\"\"\n        return [\n            # File operations\n            self.tools.search_files,\n            self.tools.download_file,\n            self.tools.upload_file,\n            self.tools.list_folder,\n            self.tools.get_file_metadata,\n            \n            # Email operations\n            self.tools.search_emails,\n            self.tools.send_message,\n            self.tools.list_threads,\n            \n            # Document operations\n            self.tools.create_document,\n            self.tools.read_document,\n            \n            # Web operations\n            self.tools.search_web,\n            self.tools.navigate_and_scrape,\n            \n            # Utilities\n            self.tools.parse_data,\n            self.tools.merge_results,\n            self.tools.get_health_report,\n        ]\n    \n    async def start_background_cleanup(self, interval_sec: float = 60.0):\n        \"\"\"Start periodic idle cleanup (self-healing)\"\"\"\n        async def cleanup_loop():\n            while True:\n                await asyncio.sleep(interval_sec)\n                await self.loader.cleanup_idle()\n        \n        self._cleanup_task = asyncio.create_task(cleanup_loop())\n    \n    async def shutdown(self):\n        \"\"\"Graceful shutdown\"\"\"\n        if self._cleanup_task:\n            self._cleanup_task.cancel()\n\n\n# ═══════════════════════════════════════════════════════════════════════════\n# EASTER EGGS (For Masters of the Trade)\n# ═══════════════════════════════════════════════════════════════════════════\n\n\"\"\"\n🎯 EASTER EGGS FOR THE APEX:\n\n1. Metrics Self-Evolution:\n   Every tool call improves the next one. Adaptive timeouts, preference scoring.\n   Masters will notice tools getting faster over time.\n\n2. One-Hit Philosophy:\n   Parallel execution where possible, exponential backoff on failures.\n   First attempt succeeds 95%+ of the time.\n\n3. Self-Aware Degradation Detection:\n   System knows when it's struggling and logs it for analysis.\n   Can trigger automated recovery or escalation.\n\n4. Future-Proof Adapter Registry:\n   Add new connectors in 3 lines of code. No architectural changes needed.\n\n5. Context-Aware Timeouts:\n   Slow connectors get more time. Fast connectors stay responsive.\n   System learns and adapts.\n\n6. Deduplication Hash:\n   MD5 hash of JSON-normalized results prevents duplicate evidence.\n   Critical for legal cases where redundancy = weakness.\n\n7. Evolution Logging:\n   Every significant event logged for continuous improvement.\n   Can train next generation of agents on this data.\n\n8. Lazy Loading Pattern:\n   Zero startup cost. Connectors load on first use, unload on timeout.\n   Perfect for AI agents with variable workloads.\n\n9. Context Manager Discipline:\n   Every operation properly scoped and recoverable.\n   Errors don't cascade.\n\n10. The Iceberg Beneath:\n    Users see 15 tools. Agents control 128+ through 8 connectors.\n    Architecture supports infinite scaling.\n\"\"\"\n\nif __name__ == \"__main__\":\n    print(__doc__)\n"
+"""Executable universal connector abstraction for Pro Comet Agent.
+
+The historical module claimed live OneDrive, Drive, Dropbox, Gmail, and GitHub
+connectors while returning empty placeholder values. This replacement makes the
+boundary truthful: concrete connectors must be registered explicitly, missing
+connectors fail closed, and the generic orchestration/metrics/data utilities are
+fully executable without pretending external access exists.
+"""
+from __future__ import annotations
+
+import asyncio
+import csv
+import hashlib
+import io
+import json
+import time
+import xml.etree.ElementTree as ET
+from abc import ABC, abstractmethod
+from contextlib import asynccontextmanager
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Awaitable, Callable, Iterable, Mapping, Sequence
+
+
+class ConnectorSource(str, Enum):
+    ONEDRIVE = "onedrive"
+    GDRIVE = "gdrive"
+    DROPBOX = "dropbox"
+    GMAIL_CASEY = "gmail_casey"
+    GMAIL_GLACIER = "gmail_glacier"
+    GITHUB = "github"
+    ALL = "all"
+
+
+class ConnectorUnavailableError(RuntimeError):
+    """Raised when a requested external connector has not been registered."""
+
+
+class UnsupportedOperationError(RuntimeError):
+    """Raised when a registered adapter does not expose the requested operation."""
+
+
+@dataclass
+class ToolMetrics:
+    tool_name: str
+    source: str
+    call_count: int = 0
+    success_count: int = 0
+    error_count: int = 0
+    total_latency_ms: float = 0.0
+    last_error: str | None = None
+    last_error_time: str | None = None
+
+    @property
+    def avg_latency_ms(self) -> float:
+        return self.total_latency_ms / self.call_count if self.call_count else 0.0
+
+    @property
+    def success_rate(self) -> float:
+        return self.success_count / self.call_count if self.call_count else 1.0
+
+    def record_success(self, latency_ms: float) -> None:
+        self.call_count += 1
+        self.success_count += 1
+        self.total_latency_ms += latency_ms
+
+    def record_error(self, error: BaseException, latency_ms: float) -> None:
+        self.call_count += 1
+        self.error_count += 1
+        self.total_latency_ms += latency_ms
+        self.last_error = f"{type(error).__name__}: {error}"
+        self.last_error_time = datetime.now(timezone.utc).isoformat()
+
+    def is_degraded(self, minimum_calls: int = 3, max_error_rate: float = 0.20) -> bool:
+        return self.call_count >= minimum_calls and (self.error_count / self.call_count) > max_error_rate
+
+
+class MetricsCollector:
+    def __init__(self) -> None:
+        self._metrics: dict[str, ToolMetrics] = {}
+        self.started_at = datetime.now(timezone.utc)
+
+    def get_or_create(self, tool_name: str, source: str) -> ToolMetrics:
+        key = f"{tool_name}:{source}"
+        if key not in self._metrics:
+            self._metrics[key] = ToolMetrics(tool_name=tool_name, source=source)
+        return self._metrics[key]
+
+    def health_report(self) -> dict[str, Any]:
+        values = list(self._metrics.values())
+        total_calls = sum(item.call_count for item in values)
+        total_success = sum(item.success_count for item in values)
+        return {
+            "started_at": self.started_at.isoformat(),
+            "total_calls": total_calls,
+            "success_count": total_success,
+            "error_count": sum(item.error_count for item in values),
+            "success_rate": total_success / total_calls if total_calls else 1.0,
+            "degraded_tools": sorted(
+                f"{item.tool_name}:{item.source}" for item in values if item.is_degraded()
+            ),
+            "tools": {
+                f"{item.tool_name}:{item.source}": {
+                    **asdict(item),
+                    "avg_latency_ms": round(item.avg_latency_ms, 3),
+                    "success_rate": round(item.success_rate, 6),
+                }
+                for item in values
+            },
+        }
+
+
+class ConnectorAdapter(ABC):
+    """Minimal asynchronous adapter contract used by the universal layer."""
+
+    def __init__(self, source: ConnectorSource) -> None:
+        if source is ConnectorSource.ALL:
+            raise ValueError("ALL is a selector, not a concrete connector")
+        self.source = source
+        self.connected = False
+
+    @abstractmethod
+    async def connect(self) -> None:
+        """Establish the external connection or raise an exception."""
+
+    @abstractmethod
+    async def search(self, query: str, *, limit: int = 50) -> list[dict[str, Any]]:
+        """Search the connector and return structured results."""
+
+    @abstractmethod
+    async def download(self, file_id: str) -> bytes:
+        """Download one object by connector-native identifier."""
+
+    async def upload(self, path: str, destination: str) -> dict[str, Any]:
+        raise UnsupportedOperationError(f"{self.source.value} does not implement upload")
+
+    async def list_folder(self, folder_id: str) -> list[dict[str, Any]]:
+        raise UnsupportedOperationError(f"{self.source.value} does not implement list_folder")
+
+    async def metadata(self, file_id: str) -> dict[str, Any]:
+        raise UnsupportedOperationError(f"{self.source.value} does not implement metadata")
+
+    async def send_message(self, to: str, body: str) -> dict[str, Any]:
+        raise UnsupportedOperationError(f"{self.source.value} does not implement send_message")
+
+    async def list_threads(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        raise UnsupportedOperationError(f"{self.source.value} does not implement list_threads")
+
+    async def close(self) -> None:
+        self.connected = False
+
+
+AdapterFactory = Callable[[], ConnectorAdapter]
+
+
+class LazyConnectorLoader:
+    """Register, connect, reuse, and retire connector adapters deterministically."""
+
+    def __init__(self, *, idle_timeout_s: float = 300.0, metrics: MetricsCollector | None = None) -> None:
+        if idle_timeout_s <= 0:
+            raise ValueError("idle_timeout_s must be positive")
+        self.idle_timeout_s = float(idle_timeout_s)
+        self.metrics = metrics or MetricsCollector()
+        self._factories: dict[ConnectorSource, AdapterFactory] = {}
+        self._loaded: dict[ConnectorSource, ConnectorAdapter] = {}
+        self._last_used: dict[ConnectorSource, float] = {}
+        self._lock = asyncio.Lock()
+
+    @property
+    def registered_sources(self) -> tuple[ConnectorSource, ...]:
+        return tuple(sorted(self._factories, key=lambda item: item.value))
+
+    def register(self, source: ConnectorSource | str, factory: AdapterFactory) -> None:
+        resolved = self._source(source)
+        if resolved is ConnectorSource.ALL:
+            raise ValueError("cannot register ALL selector")
+        self._factories[resolved] = factory
+
+    def unregister(self, source: ConnectorSource | str) -> None:
+        resolved = self._source(source)
+        self._factories.pop(resolved, None)
+
+    @staticmethod
+    def _source(source: ConnectorSource | str) -> ConnectorSource:
+        if isinstance(source, ConnectorSource):
+            return source
+        try:
+            return ConnectorSource(source)
+        except ValueError as exc:
+            raise ValueError(f"unknown connector source: {source}") from exc
+
+    async def _load(self, source: ConnectorSource) -> ConnectorAdapter:
+        async with self._lock:
+            adapter = self._loaded.get(source)
+            if adapter is not None:
+                self._last_used[source] = time.monotonic()
+                return adapter
+            factory = self._factories.get(source)
+            if factory is None:
+                raise ConnectorUnavailableError(
+                    f"connector {source.value!r} is not registered; external access is unavailable"
+                )
+            adapter = factory()
+            if adapter.source is not source:
+                raise ValueError(
+                    f"adapter factory registered for {source.value} returned {adapter.source.value}"
+                )
+            await adapter.connect()
+            adapter.connected = True
+            self._loaded[source] = adapter
+            self._last_used[source] = time.monotonic()
+            return adapter
+
+    @asynccontextmanager
+    async def get_adapter(self, source: ConnectorSource | str):
+        resolved = self._source(source)
+        if resolved is ConnectorSource.ALL:
+            raise ValueError("ALL cannot be opened as one adapter")
+        adapter = await self._load(resolved)
+        try:
+            yield adapter
+        finally:
+            self._last_used[resolved] = time.monotonic()
+
+    async def close_idle(self, *, now: float | None = None) -> tuple[str, ...]:
+        timestamp = time.monotonic() if now is None else now
+        closed: list[str] = []
+        for source, adapter in list(self._loaded.items()):
+            if timestamp - self._last_used.get(source, timestamp) >= self.idle_timeout_s:
+                await adapter.close()
+                self._loaded.pop(source, None)
+                self._last_used.pop(source, None)
+                closed.append(source.value)
+        return tuple(sorted(closed))
+
+    async def close_all(self) -> None:
+        for adapter in list(self._loaded.values()):
+            await adapter.close()
+        self._loaded.clear()
+        self._last_used.clear()
+
+
+class UniversalTools:
+    """Small operational surface over explicitly registered connector adapters."""
+
+    FILE_SOURCES = (
+        ConnectorSource.ONEDRIVE,
+        ConnectorSource.GDRIVE,
+        ConnectorSource.DROPBOX,
+        ConnectorSource.GITHUB,
+    )
+    EMAIL_SOURCES = (ConnectorSource.GMAIL_CASEY, ConnectorSource.GMAIL_GLACIER)
+
+    def __init__(self, loader: LazyConnectorLoader | None = None) -> None:
+        self.loader = loader or LazyConnectorLoader()
+        self.metrics = self.loader.metrics
+
+    async def _call(
+        self,
+        source: ConnectorSource,
+        operation_name: str,
+        operation: Callable[[ConnectorAdapter], Awaitable[Any]],
+    ) -> Any:
+        metric = self.metrics.get_or_create(operation_name, source.value)
+        started = time.perf_counter()
+        try:
+            async with self.loader.get_adapter(source) as adapter:
+                result = await operation(adapter)
+        except BaseException as exc:
+            metric.record_error(exc, (time.perf_counter() - started) * 1000.0)
+            raise
+        metric.record_success((time.perf_counter() - started) * 1000.0)
+        return result
+
+    def _selected_sources(
+        self,
+        selector: ConnectorSource | str,
+        allowed: Sequence[ConnectorSource],
+    ) -> tuple[ConnectorSource, ...]:
+        resolved = self.loader._source(selector)
+        if resolved is ConnectorSource.ALL:
+            registered = set(self.loader.registered_sources)
+            selected = tuple(source for source in allowed if source in registered)
+            if not selected:
+                raise ConnectorUnavailableError("no compatible connectors are registered")
+            return selected
+        if resolved not in allowed:
+            raise ValueError(f"connector {resolved.value} is not valid for this operation")
+        return (resolved,)
+
+    async def search_files(
+        self,
+        query: str,
+        source: ConnectorSource | str = ConnectorSource.ALL,
+        *,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        if not query.strip():
+            raise ValueError("query must be non-empty")
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        sources = self._selected_sources(source, self.FILE_SOURCES)
+        batches = await asyncio.gather(*(
+            self._call(
+                item,
+                "search_files",
+                lambda adapter, item=item: adapter.search(query, limit=limit),
+            )
+            for item in sources
+        ))
+        enriched: list[dict[str, Any]] = []
+        for src, batch in zip(sources, batches, strict=True):
+            for row in batch:
+                enriched.append({"source": src.value, **dict(row)})
+        return self.merge_results(enriched)[:limit]
+
+    async def download_file(self, file_id: str, source: ConnectorSource | str) -> bytes:
+        if not file_id.strip():
+            raise ValueError("file_id must be non-empty")
+        resolved = self.loader._source(source)
+        if resolved not in self.FILE_SOURCES:
+            raise ValueError(f"connector {resolved.value} is not a file source")
+        data = await self._call(resolved, "download_file", lambda adapter: adapter.download(file_id))
+        if not isinstance(data, bytes):
+            raise TypeError("connector download() must return bytes")
+        return data
+
+    async def search_emails(
+        self,
+        query: str,
+        account: ConnectorSource | str = ConnectorSource.ALL,
+        *,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        if not query.strip():
+            raise ValueError("query must be non-empty")
+        sources = self._selected_sources(account, self.EMAIL_SOURCES)
+        batches = await asyncio.gather(*(
+            self._call(
+                item,
+                "search_emails",
+                lambda adapter, item=item: adapter.search(query, limit=limit),
+            )
+            for item in sources
+        ))
+        enriched = [
+            {"source": src.value, **dict(row)}
+            for src, batch in zip(sources, batches, strict=True)
+            for row in batch
+        ]
+        return self.merge_results(enriched)[:limit]
+
+    async def upload_file(
+        self,
+        path: str,
+        destination: str,
+        source: ConnectorSource | str,
+    ) -> dict[str, Any]:
+        resolved = self.loader._source(source)
+        return await self._call(
+            resolved,
+            "upload_file",
+            lambda adapter: adapter.upload(path, destination),
+        )
+
+    async def list_folder(
+        self,
+        folder_id: str,
+        source: ConnectorSource | str,
+    ) -> list[dict[str, Any]]:
+        resolved = self.loader._source(source)
+        return await self._call(resolved, "list_folder", lambda adapter: adapter.list_folder(folder_id))
+
+    async def get_file_metadata(
+        self,
+        file_id: str,
+        source: ConnectorSource | str,
+    ) -> dict[str, Any]:
+        resolved = self.loader._source(source)
+        return await self._call(resolved, "metadata", lambda adapter: adapter.metadata(file_id))
+
+    async def send_message(
+        self,
+        to: str,
+        body: str,
+        account: ConnectorSource | str,
+    ) -> dict[str, Any]:
+        resolved = self.loader._source(account)
+        if resolved not in self.EMAIL_SOURCES:
+            raise ValueError(f"connector {resolved.value} is not an email account")
+        return await self._call(resolved, "send_message", lambda adapter: adapter.send_message(to, body))
+
+    async def list_threads(
+        self,
+        account: ConnectorSource | str = ConnectorSource.ALL,
+        *,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        sources = self._selected_sources(account, self.EMAIL_SOURCES)
+        batches = await asyncio.gather(*(
+            self._call(item, "list_threads", lambda adapter, item=item: adapter.list_threads(limit=limit))
+            for item in sources
+        ))
+        return self.merge_results(
+            {"source": src.value, **dict(row)}
+            for src, batch in zip(sources, batches, strict=True)
+            for row in batch
+        )[:limit]
+
+    @staticmethod
+    def parse_data(data: str | bytes, format: str = "json") -> Any:
+        text = data.decode("utf-8") if isinstance(data, bytes) else data
+        kind = format.lower()
+        if kind == "json":
+            return json.loads(text)
+        if kind == "csv":
+            return list(csv.DictReader(io.StringIO(text)))
+        if kind == "xml":
+            root = ET.fromstring(text)
+            return {
+                "tag": root.tag,
+                "attributes": dict(root.attrib),
+                "children": [
+                    {"tag": child.tag, "attributes": dict(child.attrib), "text": child.text or ""}
+                    for child in root
+                ],
+            }
+        raise ValueError(f"unsupported data format: {format}")
+
+    @staticmethod
+    def merge_results(results: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+        """Deduplicate structured results without losing distinct source identities."""
+        merged: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for row in results:
+            item = dict(row)
+            stable_identity = item.get("id") or item.get("file_id") or item.get("url")
+            if stable_identity is None:
+                stable_identity = hashlib.sha256(
+                    json.dumps(item, sort_keys=True, default=str, separators=(",", ":")).encode()
+                ).hexdigest()
+            key = f"{item.get('source', '')}:{stable_identity}"
+            if key not in seen:
+                seen.add(key)
+                merged.append(item)
+        return merged
+
+    async def get_health_report(self) -> dict[str, Any]:
+        return self.metrics.health_report()
+
+
+__all__ = [
+    "ConnectorAdapter",
+    "ConnectorSource",
+    "ConnectorUnavailableError",
+    "LazyConnectorLoader",
+    "MetricsCollector",
+    "ToolMetrics",
+    "UniversalTools",
+    "UnsupportedOperationError",
+]
