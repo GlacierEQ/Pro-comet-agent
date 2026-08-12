@@ -1,169 +1,87 @@
-# 🎯 UNIVERSAL TOOLS FRAMEWORK — APEX INTEGRATION GUIDE
+# Universal Tools Framework
 
-**Status**: ✅ **PRODUCTION-READY**  
-**Commit**: `c450a95e90967afdefb82dbc8ad878094e570608`  
-**Architecture**: 15 universal tools + 8 lazy-loading connectors + self-aware metrics
+## Current status
 
----
+The framework is an **executable connector abstraction**, not a bundle of pre-authenticated external integrations.
 
-## 📋 WHAT IS THIS?
+It provides:
 
-**Universal Tools Framework** replaces 128 separate connector tools with **15 elegant abstraction tools** that route to any connector on demand.
+- explicit connector registration;
+- lazy connection creation and reuse;
+- parallel search across registered sources;
+- structured downloads and optional adapter operations;
+- deterministic source-aware deduplication;
+- JSON, CSV, and XML parsing;
+- per-operation latency/success/error metrics;
+- idle connector cleanup;
+- fail-closed behavior when a connector or operation is unavailable.
 
-### Before (128 tools everywhere):
+It does **not** claim live OneDrive, Google Drive, Dropbox, Gmail, or GitHub credentials merely because those connector names exist in the enum. Concrete external adapters must be registered by the runtime that actually owns those credentials and APIs.
+
+## Why this changed
+
+The historical module advertised “production-ready” integrations while its concrete adapter methods returned placeholder empty lists or byte strings. That was not an integration. The current implementation removes those fake-success paths.
+
+## Architecture
+
+```text
+Caller
+  ↓
+UniversalTools
+  ↓
+LazyConnectorLoader
+  ↓
+explicitly registered ConnectorAdapter factory
+  ↓
+real external implementation supplied by the consuming runtime
+```
+
+If no compatible adapter is registered, the call raises `ConnectorUnavailableError`. Unsupported adapter operations raise `UnsupportedOperationError`. Empty output is therefore an actual connector result, not the framework pretending a missing integration succeeded.
+
+## Core operations
+
 ```python
-# Agent had to remember 128 tools
-search_onedrive_files()
-search_gdrive_files()
-search_dropbox_files()
-search_gmail_casey()
-search_gmail_glacier()
-# ... 123 more tools
-```
-
-### After (15 universal tools):
-```python
-# Agent calls one universal tool
-search_files(query="case evidence", source="all")
-search_files(query="declarations", source="onedrive")
-search_emails(query="Brower motion", account="casey")
-```
-
----
-
-## 🏗️ ARCHITECTURE
-
-```
-Agent → Universal Tools → Lazy Loader → 8 Connectors
-         (15 tools)      (smart)       (128+ tools)
-                             ↓
-                        Metrics/Evolution
-                        (self-aware)
-```
-
-**Key insight**: Agent sees clean 15-tool interface. Hidden complexity manages 128+ tools intelligently.
-
----
-
-## 🚀 THE 15 UNIVERSAL TOOLS
-
-### FILE OPERATIONS
-- `search_files(query, source="all", limit=50)` — Parallel search across sources
-- `download_file(file_id, source)` — Download from specific source
-- `upload_file(path, destination, source)` — Upload to connector
-- `list_folder(folder_id, source)` — List folder contents
-- `get_file_metadata(file_id, source)` — Get file metadata
-
-### EMAIL OPERATIONS
-- `search_emails(query, account="all", limit=50)` — Search Gmail (both accounts)
-- `send_message(to, body, account)` — Send email
-- `list_threads(account="all", limit=50)` — List threads
-
-### DOCUMENT OPERATIONS
-- `create_document(title, content, service="gdrive")` — Create doc
-- `read_document(doc_id, service="gdrive")` — Read doc
-
-### WEB OPERATIONS
-- `search_web(query, num_results=10)` — Web search
-- `navigate_and_scrape(url, selectors)` — Browser automation
-
-### UTILITIES
-- `parse_data(data, format="json")` — Parse JSON/CSV/XML
-- `merge_results(results)` — Merge & deduplicate
-- `get_health_report()` — System metrics & evolution
-
----
-
-## 💡 KEY FEATURES
-
-### 1. Lazy Loading
-Connectors load on-demand, unload after timeout. Zero startup cost.
-
-### 2. Parallel Execution
-Search multiple sources simultaneously. Merge results automatically.
-
-### 3. Self-Healing Metrics
-Every operation improves the next one. Adaptive timeouts, error recovery.
-
-### 4. Dual-Account Email
-Search both Gmail accounts transparently:
-```python
-await tools.search_emails(query="court notice", account="all")
-# Searches both casey.barton92@gmail.com & glacier.equilibrium@gmail.com
-```
-
-### 5. Deduplication
-MD5 hash prevents duplicate evidence. Critical for legal cases.
-
-### 6. Self-Aware Evolution
-Every event logged for continuous improvement & training.
-
----
-
-## 🔧 USAGE EXAMPLES
-
-### Search All Platforms
-```python
-evidence = await tools.search_files(
-    query="1FDV-23-0001009",
-    source="all",
-    limit=100
+from modules.universal_tools_framework import (
+    ConnectorAdapter,
+    ConnectorSource,
+    LazyConnectorLoader,
+    UniversalTools,
 )
-# Returns merged results from OneDrive, Google Drive, Dropbox
-```
 
-### Search Both Email Accounts
-```python
-emails = await tools.search_emails(
-    query="Brower motion OR CSEA",
-    account="all"
-)
-# Searches both accounts, merges results
-```
+loader = LazyConnectorLoader()
+loader.register(ConnectorSource.GDRIVE, make_real_drive_adapter)
+tools = UniversalTools(loader)
 
-### Get System Health
-```python
+rows = await tools.search_files("case evidence", source="gdrive")
+data = await tools.download_file("native-file-id", source="gdrive")
 health = await tools.get_health_report()
-print(f"Success rate: {health['success_rate']:.1%}")
-print(f"Avg latency: {health['avg_latency_ms']:.0f}ms")
 ```
 
----
+The adapter factory is intentionally external to this module. That keeps authentication, SDK choice, account identity, and secret handling in the system that genuinely owns them.
 
-## 📊 ADAPTER REGISTRY
+## Local utilities
 
-Add new connectors in 3 lines:
+These execute without external credentials:
 
 ```python
-self.adapter_classes = {
-    ConnectorSource.ONEDRIVE: OneDriveAdapter,
-    # Add new connector:
-    ConnectorSource.NOTION: NotionAdapter,  # ← That's it
-}
+UniversalTools.parse_data('{"status":"ok"}', "json")
+UniversalTools.parse_data("a,b\n1,2\n", "csv")
+UniversalTools.parse_data("<root><item>x</item></root>", "xml")
+UniversalTools.merge_results([...])
 ```
 
----
+## Verification
 
-## ✨ EASTER EGGS
+`tests/test_universal_tools_framework.py` proves:
 
-1. **Self-Degradation Detection** — System knows when it's struggling
-2. **Context-Aware Routing** — Preference scoring for retry logic
-3. **One-Hit Philosophy** — 95%+ first-attempt success
-4. **Evolution Training Data** — Every operation logged for optimization
-5. **The Iceberg** — Users see 15 tools, agents control 128+
+- absent connectors fail closed;
+- registered adapters are lazily connected and reused;
+- `source="all"` searches only registered compatible connectors;
+- source identities are preserved during merge/deduplication;
+- unsupported operations are explicit failures;
+- downloaded bytes come from the adapter rather than a framework placeholder;
+- idle adapters close;
+- local parse utilities execute;
+- metrics reflect real calls.
 
----
-
-## 🎉 BENEFITS
-
-✅ Token savings: 128 → 15 tools  
-✅ Context clarity: Agent knows exactly what tools do  
-✅ MCP discipline: Proper lazy-loading pattern  
-✅ Performance: Parallel execution, adaptive timeouts  
-✅ Extensibility: Add connectors without code changes  
-✅ Self-healing: Automatic error recovery  
-✅ Self-aware: Metrics & evolution logging  
-
----
-
-**Framework deployed. Ready for apex agent architecture.** ⚖️✨
+The repository CI also builds and tests the TypeScript Comet browser runtime. The browser server remains the primary product surface of this repository; the Python universal layer is a reusable compatibility/orchestration module.
