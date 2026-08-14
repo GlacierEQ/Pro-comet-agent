@@ -1,49 +1,56 @@
-# Pro-Comet Agent — Advanced Comet Agent & Prisma Data Stack 💫
+# Pro-Comet Agent
 
-> **TypeScript full-stack browser agent with Prisma ORM database models and Python harness.**
+**Browser-automation server plus a fail-closed connector-adapter runtime.**
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6)]()
-[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)]()
-[![Python](https://img.shields.io/badge/Python-3.9+-blue)]()
-[![Domain](https://img.shields.io/badge/Domain-Browser%20Agent-blue)]()
+Pro-Comet Agent is a public diligence project that demonstrates two bounded systems:
 
----
+1. a TypeScript browser-automation service with explicit provider interfaces; and
+2. a Python connector orchestration layer that requires adapters to be registered explicitly instead of pretending external services are connected.
 
-## 🎯 For Recruiters & Hiring Managers
+## Implemented surfaces
 
-This repository implements **Pro-Comet Agent** — an advanced web automation agent backed by Prisma ORM for structured action history and session persistence. It demonstrates:
+### TypeScript browser runtime
 
-- **Prisma ORM schema modeling** storing web interactions, DOM selectors, and session snapshots
-- **TypeScript agent controller** managing browser contexts and CDP message pipelines
-- **Shell automation scripts** managing database migration and agent container lifecycle
-- **Python simulation test harness** verifying end-to-end agent action flows
+The TypeScript application includes:
 
-**Why this matters**: Enterprise browser agents require relational persistence to audit actions, retry failed steps, and analyze user session histories.
+- request contracts in `src/contracts/browser.schema.ts`;
+- provider selection in `src/browser/providerFactory.ts`;
+- provider implementations for Playwright, Comet/CDP, and Stagehand under `src/providers/`;
+- Express routes and server composition under `src/server/`;
+- a Prisma schema for structured persistence in `prisma/schema.prisma`.
 
----
+Hosted CI installs the locked Node dependency graph, runs the repository's Jest suite, and compiles the TypeScript server with `tsc`.
 
-## 🔬 For Engineers & Technical Reviewers
+### Explicit connector-adapter runtime
 
-### Core Components
+`modules/universal_tools_framework.py` provides an asynchronous adapter contract, lazy connection reuse, fail-closed handling for unavailable connectors, per-tool health metrics, source-preserving result merging, and JSON/CSV/XML parsing.
 
-| Component | Language | Purpose |
-|---|---|---|
-| `prisma/schema.prisma` | Prisma | Relational model for agent sessions and action logs |
-| `src/agent.ts` | TypeScript | Core agent controller and DOM action dispatcher |
-| `tests/` | Python | Test wrapper validating agent execution |
+The generic runtime **does not bundle or claim live access** to Google Drive, Dropbox, Gmail, GitHub, OneDrive, or any other SaaS provider. A concrete adapter must be registered by the caller before an external operation can occur. Missing connectors and unsupported operations fail explicitly.
 
----
+The Python behavior suite verifies connector registration boundaries, reuse, cleanup, source preservation, unsupported-operation handling, parsing, and deduplication.
 
-## 🤖 ML/AI & Programmatic Mesh Integration
+## What this repository does not establish
 
-- **MCP Tool**: `run_comet_agent()` — browser automation tool for swarm agents
-- **Mastermind Sidecar**: Connected to APEX Highway mesh
-- **SHA-256 Integrity**: Tracked in `.integrity/file_hashes.json`
+- No live MCP, APEX, Mastermind, or provider-mesh integration is claimed.
+- No bundled credentials, proprietary provider access, or universal SaaS connectivity is claimed.
+- A successful TypeScript build does not prove a production browser deployment, external CDP endpoint, Browserbase account, or live Stagehand session.
+- The Prisma schema does not by itself establish a migrated or production database.
+- No production reliability, throughput, latency, security certification, or autonomous operational authority is claimed.
 
----
+## Verification
 
-## ⚡ Quick Start
+The repository-owned CI runs Python behavior proof and the TypeScript test/build path. The same bounded checks can be reproduced locally:
 
 ```bash
-python3 tests/test_comet_agent.py
+python -m unittest discover -s tests -p 'test_*.py' -v
+python scripts/verify_public_truth.py
+npm ci
+npm test -- --runInBand
+npm run build
 ```
+
+Browser-provider execution that depends on external services or a local browser is intentionally outside this deterministic proof unless the required runtime is explicitly supplied.
+
+## Repository identity
+
+This repository is `GlacierEQ/Pro-comet-agent`. Its package metadata, public documentation, and machine-readable capability surface are expected to describe that repository only. The governing license is the GlacierEQ Proprietary License in [`LICENSE`](./LICENSE); public visibility is for inspection and diligence, not an open-source grant.

@@ -1,1 +1,14 @@
-{"capabilities": ["hyper-scaling"]}
+{
+  "schema": "glaciereq.bounded-capabilities.v1",
+  "capabilities": [
+    "explicit-fail-closed-connector-adapter-orchestration",
+    "source-preserving-connector-result-merging",
+    "connector-health-metrics-and-idle-lifecycle",
+    "json-csv-xml-local-data-parsing",
+    "typescript-browser-provider-server-build"
+  ],
+  "operational_authority": false,
+  "live_external_connectors_bundled": false,
+  "live_mcp_apex_mastermind_integration": false,
+  "production_browser_deployment_proven": false
+}
