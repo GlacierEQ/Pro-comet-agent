@@ -5,10 +5,29 @@
     "source-preserving-connector-result-merging",
     "connector-health-metrics-and-idle-lifecycle",
     "json-csv-xml-local-data-parsing",
-    "typescript-browser-provider-server-build"
+    "typescript-browser-provider-server-build",
+    "apex-mass-recovery-enrolled"
   ],
   "operational_authority": false,
   "live_external_connectors_bundled": false,
   "live_mcp_apex_mastermind_integration": false,
-  "production_browser_deployment_proven": false
+  "production_browser_deployment_proven": false,
+  "recovery": {
+    "identity": "APEX_IS_THE_COUNTER_TO_CANONICAL_DESTRUCTION",
+    "law": "MAXIMUM_COHERENT_ADVANCE",
+    "program": "mass-job-repo-recovery",
+    "dual_plane": true
+  },
+  "planes": {
+    "verified": [
+      "explicit-fail-closed-connector-adapter-orchestration",
+      "source-preserving-connector-result-merging",
+      "connector-health-metrics-and-idle-lifecycle",
+      "json-csv-xml-local-data-parsing",
+      "typescript-browser-provider-server-build"
+    ],
+    "implemented": [
+      "apex-mass-recovery-enrolled"
+    ]
+  }
 }
